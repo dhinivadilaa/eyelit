@@ -117,5 +117,5 @@
         "resources/js/**/*.ts",
         "resources/js/**/*.d.ts",
         "resources/js/**/*.tsx"
-    ]
+, "resources/js/hooks/use-appearance.jsx", "resources/js/hooks/use-clipboard.jsx", "resources/js/hooks/use-current-url.jsx", "resources/js/hooks/use-flash-toast.jsx", "resources/js/hooks/use-initials.jsx", "resources/js/hooks/use-mobile-navigation.jsx", "resources/js/hooks/use-mobile.jsx", "resources/js/hooks/use-two-factor-auth.jsx"    ]
 }
