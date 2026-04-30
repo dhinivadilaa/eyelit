@@ -76,7 +76,7 @@ export default function ResetPassword({ token, email }: Props) {
                             name="email"
                             autoComplete="email"
                             value={email}
-                            className="h-12"
+                            className="h-10"
                             readOnly
                         />
                     </div>
@@ -156,7 +156,7 @@ export default function ResetPassword({ token, email }: Props) {
 
                     <Button
                         type="submit"
-                        className="mt-2 h-12 w-full bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
+                        className="mt-2 h-10 w-full bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
                         disabled={processing}
                     >
                         {processing && <Spinner />}

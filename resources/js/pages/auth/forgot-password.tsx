@@ -70,7 +70,7 @@ export default function ForgotPassword({ status }: Props) {
                             autoComplete="off"
                             autoFocus
                             placeholder="email@contoh.com"
-                            className="h-12"
+                            className="h-10"
                             value={data.email}
                             onChange={(e) => {
                                 setData('email', e.target.value);
@@ -86,7 +86,7 @@ export default function ForgotPassword({ status }: Props) {
 
                     <Button
                         type="submit"
-                        className="mt-4 w-full h-12 bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
+                        className="mt-4 w-full h-10 bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
                         disabled={processing}
                     >
                         {processing && (

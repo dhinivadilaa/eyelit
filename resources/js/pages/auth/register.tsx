@@ -97,7 +97,7 @@ export default function Register() {
                             autoComplete="name"
                             name="name"
                             placeholder="Masukkan nama lengkap"
-                            className="h-12"
+                            className="h-10"
                             value={data.name}
                             onChange={(e) => {
                                 setData('name', e.target.value);
@@ -120,7 +120,7 @@ export default function Register() {
                             autoComplete="email"
                             name="email"
                             placeholder="email@contoh.com"
-                            className="h-12"
+                            className="h-10"
                             value={data.email}
                             onChange={(e) => {
                                 setData('email', e.target.value);
@@ -143,7 +143,7 @@ export default function Register() {
                             autoComplete="tel"
                             name="no_hp"
                             placeholder="08xxxxxxxxxx"
-                            className="h-12"
+                            className="h-10"
                             value={data.no_hp}
                             onChange={(e) => {
                                 setData('no_hp', e.target.value);

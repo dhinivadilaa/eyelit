@@ -96,7 +96,7 @@ export default function Login({
                             tabIndex={1}
                             autoComplete="email"
                             placeholder="email@contoh.com"
-                            className="h-12"
+                            className="h-10"
                             value={data.email}
                             onChange={(e) => {
                                 setData('email', e.target.value);
@@ -137,7 +137,7 @@ export default function Login({
                                 tabIndex={2}
                                 autoComplete="current-password"
                                 placeholder="Masukkan kata sandi"
-                                className="h-12 pr-10"
+                                className="h-10 pr-10"
                                 type={showPassword ? 'text' : 'password'}
                                 value={data.password}
                                 onChange={(e) => {
