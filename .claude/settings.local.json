@@ -13,7 +13,9 @@
       "Bash(cp \"/c/Users/LaLa/Downloads/KEBUTUHAN SISTEM EYELIT.docx\" /tmp/eyelit.docx)",
       "Bash(unzip -p /tmp/eyelit.docx word/document.xml)",
       "Bash(grep -v '^$')",
-      "Bash(php artisan *)"
+      "Bash(php artisan *)",
+      "Bash(php \"D:\\\\project\\\\eyelit\\\\artisan\" route:list --path=username)",
+      "Bash(php \"D:\\\\project\\\\eyelit\\\\artisan\" route:list --name=login)"
     ]
   }
 }

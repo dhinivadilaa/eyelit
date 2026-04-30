@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login, register } from '@/routes';
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 type FormErrors = {
@@ -29,52 +29,127 @@ export default function Register() {
         password_confirmation: '',
     });
 
-    const validateForm = (): FormErrors => {
-        const errors: FormErrors = {};
+    const validateUsername = (username: string): string | undefined => {
+        if (!username.trim()) return 'Nama pengguna wajib diisi.';
+        if (!/^[a-zA-Z0-9]+$/.test(username)) return 'Nama pengguna hanya boleh huruf dan angka.';
+        if (username.trim().length < 6) return 'Nama pengguna minimal 6 karakter.';
+        return undefined;
+    };
 
-        if (!data.username.trim()) {
-            errors.username = 'Nama pengguna wajib diisi.';
-        } else if (!/^[a-zA-Z0-9]+$/.test(data.username)) {
-            errors.username = 'Nama pengguna hanya boleh huruf dan angka.';
-        } else if (data.username.trim().length < 6) {
-            errors.username = 'Nama pengguna minimal 6 karakter.';
+        const validateEmail = (email: string): string | undefined => {
+        if (!email.trim()) return 'Email wajib diisi.';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Format email tidak valid.';
+        return undefined;
+    };
+
+    const validateNoHp = (no_hp: string): string | undefined => {
+        if (!no_hp.trim()) return 'Nomor HP wajib diisi.';
+        if (!/^[0-9]{11,12}$/.test(no_hp.replace(/\s/g, ''))) return 'Nomor HP harus berupa angka (11-12 digit).';
+        return undefined;
+    };
+
+    const validatePassword = (password: string): string | undefined => {
+        if (!password) return 'Kata sandi wajib diisi.';
+        if (password.length < 8) return 'Kata sandi minimal 8 karakter.';
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/.test(password)) return 'Kata sandi harus mengandung huruf besar, huruf kecil, dan angka.';
+        return undefined;
+    };
+
+    const validateConfirmPassword = (confirm: string): string | undefined => {
+        if (!confirm) return 'Konfirmasi kata sandi wajib diisi.';
+        if (confirm !== data.password) return 'Konfirmasi kata sandi tidak cocok.';
+        return undefined;
+    };
+
+    const checkUsername = useCallback(async (username: string) => {
+        if (!username.trim() || !/^[a-zA-Z0-9]+$/.test(username) || username.length < 6) {
+            return;
         }
 
-        if (!data.email.trim()) {
-            errors.email = 'Email wajib diisi.';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-            errors.email = 'Format email tidak valid.';
+        try {
+            const response = await fetch(`/username-check?username=${encodeURIComponent(username)}`);
+            const result = await response.json();
+
+            if (!result.available) {
+                setLocalErrors((prev) => ({
+                    ...prev,
+                    username: 'Nama pengguna sudah digunakan.',
+                }));
+            }
+        } catch {
+            // ignore
+        }
+    }, []);
+
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const emailDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleUsernameChange = (value: string) => {
+        setData('username', value);
+
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+
+        if (localErrors.username === 'Nama pengguna sudah digunakan.') {
+            setLocalErrors((prev) => ({ ...prev, username: undefined }));
         }
 
-        if (!data.no_hp.trim()) {
-            errors.no_hp = 'Nomor HP wajib diisi.';
-        } else if (!/^[0-9]{11,12}$/.test(data.no_hp.replace(/\s/g, ''))) {
-            errors.no_hp = 'Nomor HP harus berupa angka (11-12 digit).';
+        debounceRef.current = setTimeout(() => {
+            checkUsername(value);
+        }, 500);
+    };
+
+    const checkEmail = useCallback(async (email: string) => {
+        if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return;
         }
 
-        if (!data.password) {
-            errors.password = 'Kata sandi wajib diisi.';
-        } else if (data.password.length < 8) {
-            errors.password = 'Kata sandi minimal 8 karakter.';
-        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/.test(data.password)) {
-            errors.password = 'Kata sandi harus mengandung huruf besar, huruf kecil, dan angka.';
+        try {
+            const response = await fetch(`/email-check?email=${encodeURIComponent(email)}`);
+            const result = await response.json();
+
+            if (!result.available) {
+                setLocalErrors((prev) => ({
+                    ...prev,
+                    email: 'Email sudah digunakan.',
+                }));
+            }
+        } catch {
+            // ignore
+        }
+    }, []);
+
+    const handleEmailChange = (value: string) => {
+        setData('email', value);
+
+        if (emailDebounceRef.current) clearTimeout(emailDebounceRef.current);
+
+        if (localErrors.email === 'Email sudah digunakan.') {
+            setLocalErrors((prev) => ({ ...prev, email: undefined }));
         }
 
-        if (!data.password_confirmation) {
-            errors.password_confirmation = 'Konfirmasi kata sandi wajib diisi.';
-        } else if (data.password !== data.password_confirmation) {
-            errors.password_confirmation = 'Konfirmasi kata sandi tidak cocok.';
-        }
-
-        return errors;
+        emailDebounceRef.current = setTimeout(() => {
+            checkEmail(value);
+        }, 500);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const errors = validateForm();
-        if (Object.keys(errors).length > 0) {
-            setLocalErrors(errors);
+        const usernameError = validateUsername(data.username);
+        const emailError = validateEmail(data.email);
+        const noHpError = validateNoHp(data.no_hp);
+        const passwordError = validatePassword(data.password);
+        const confirmError = validateConfirmPassword(data.password_confirmation);
+
+        const newErrors: FormErrors = {};
+        if (usernameError) newErrors.username = usernameError;
+        if (emailError) newErrors.email = emailError;
+        if (noHpError) newErrors.no_hp = noHpError;
+        if (passwordError) newErrors.password = passwordError;
+        if (confirmError) newErrors.password_confirmation = confirmError;
+
+        if (Object.keys(newErrors).length > 0) {
+            setLocalErrors(newErrors);
             return;
         }
 
@@ -103,11 +178,13 @@ export default function Register() {
                             placeholder="Masukkan nama pengguna"
                             className="h-10"
                             value={data.username}
-                            onChange={(e) => {
-                                setData('username', e.target.value);
-                                if (localErrors.username) {
-                                    setLocalErrors((prev) => ({ ...prev, username: undefined }));
-                                }
+                            onChange={(e) => handleUsernameChange(e.target.value)}
+                            onBlur={(e) => {
+                                const error = validateUsername(e.target.value);
+                                setLocalErrors((prev) => ({
+                                    ...prev,
+                                    username: error,
+                                }));
                             }}
                         />
                         {localErrors.username && (
@@ -126,11 +203,13 @@ export default function Register() {
                             placeholder="email@contoh.com"
                             className="h-10"
                             value={data.email}
-                            onChange={(e) => {
-                                setData('email', e.target.value);
-                                if (localErrors.email) {
-                                    setLocalErrors((prev) => ({ ...prev, email: undefined }));
-                                }
+                            onChange={(e) => handleEmailChange(e.target.value)}
+                            onBlur={(e) => {
+                                const error = validateEmail(e.target.value);
+                                setLocalErrors((prev) => ({
+                                    ...prev,
+                                    email: error,
+                                }));
                             }}
                         />
                         {localErrors.email && (
@@ -155,6 +234,13 @@ export default function Register() {
                                     setLocalErrors((prev) => ({ ...prev, no_hp: undefined }));
                                 }
                             }}
+                            onBlur={(e) => {
+                                const error = validateNoHp(e.target.value);
+                                setLocalErrors((prev) => ({
+                                    ...prev,
+                                    no_hp: error,
+                                }));
+                            }}
                         />
                         {localErrors.no_hp && (
                             <p className="text-sm text-red-600">{localErrors.no_hp}</p>
@@ -178,6 +264,13 @@ export default function Register() {
                                     if (localErrors.password) {
                                         setLocalErrors((prev) => ({ ...prev, password: undefined }));
                                     }
+                                }}
+                                onBlur={(e) => {
+                                    const error = validatePassword(e.target.value);
+                                    setLocalErrors((prev) => ({
+                                        ...prev,
+                                        password: error,
+                                    }));
                                 }}
                             />
                             <button
@@ -217,6 +310,13 @@ export default function Register() {
                                     if (localErrors.password_confirmation) {
                                         setLocalErrors((prev) => ({ ...prev, password_confirmation: undefined }));
                                     }
+                                }}
+                                onBlur={(e) => {
+                                    const error = validateConfirmPassword(e.target.value);
+                                    setLocalErrors((prev) => ({
+                                        ...prev,
+                                        password_confirmation: error,
+                                    }));
                                 }}
                             />
                             <button
