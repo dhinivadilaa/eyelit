@@ -12,7 +12,8 @@
       "Bash(/c/msys64/ucrt64/bin/python3 -c \"from docx import Document; doc = Document\\(r'C:/Users/LaLa/Downloads/KEBUTUHAN SISTEM EYELIT.docx'\\); [print\\(p.text\\) for p in doc.paragraphs]\")",
       "Bash(cp \"/c/Users/LaLa/Downloads/KEBUTUHAN SISTEM EYELIT.docx\" /tmp/eyelit.docx)",
       "Bash(unzip -p /tmp/eyelit.docx word/document.xml)",
-      "Bash(grep -v '^$')"
+      "Bash(grep -v '^$')",
+      "Bash(php artisan *)"
     ]
   }
 }
