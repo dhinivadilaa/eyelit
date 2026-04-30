@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "Bash(pip install *)",
+      "Bash(D:\\\\coding\\\\py\\\\python.exe *)",
+      "Bash(pip3 install *)",
+      "Bash(python3 -c \"from docx import Document; doc = Document\\(r'c:/Users/LaLa/Downloads/KEBUTUHAN SISTEM EYELIT.docx'\\); [print\\(p.text\\) for p in doc.paragraphs]\")",
+      "Bash(\"/c/Users/LaLa/AppData/Local/Programs/Python/Python*/python.exe\" -c \"from docx import Document; doc = Document\\(r'c:/Users/LaLa/Downloads/KEBUTUHAN SISTEM EYELIT.docx'\\); [print\\(p.text\\) for p in doc.paragraphs]\")",
+      "Read(//c/Users/LaLa/AppData/Local/Programs/Python//**)",
+      "Bash(/c/msys64/ucrt64/bin/python3 -m pip install python-docx -q)",
+      "Bash(/c/msys64/ucrt64/bin/python3 -c \"from docx import Document; doc = Document\\(r'C:/Users/LaLa/Downloads/KEBUTUHAN SISTEM EYELIT.docx'\\); [print\\(p.text\\) for p in doc.paragraphs]\")",
+      "Bash(cp \"/c/Users/LaLa/Downloads/KEBUTUHAN SISTEM EYELIT.docx\" /tmp/eyelit.docx)",
+      "Bash(unzip -p /tmp/eyelit.docx word/document.xml)",
+      "Bash(grep -v '^$')"
+    ]
+  }
+}

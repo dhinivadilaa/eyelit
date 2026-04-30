@@ -2,6 +2,18 @@
 
 A Laravel 13 + React 19 starter kit with Inertia.js, featuring a modern UI component library and AI integration.
 
+## Color Palette
+
+Website EyeLit menggunakan tiga warna utama:
+
+| Warna      | Hex Code  | Penggunaan                              |
+|------------|-----------|-----------------------------------------|
+| Biru       | `#2264c0` | Tombol utama, link, aksen              |
+| Putih      | `#FFFFFF` | Background form, area bersih            |
+| Hitam      | `#000000` | Teks utama, border, elemen solid        |
+
+---
+
 ## Tech Stack
 
 **Backend**
