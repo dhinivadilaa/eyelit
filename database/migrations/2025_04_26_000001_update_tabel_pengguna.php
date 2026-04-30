@@ -9,7 +9,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('no_hp', 20)->nullable()->after('email');
             $table->string('foto_profil')->nullable()->after('no_hp');
             $table->enum('peran', ['Admin', 'Pengguna'])->default('Pengguna')->after('foto_profil');
             $table->enum('status_akun', ['Aktif', 'Nonaktif'])->default('Aktif')->after('peran');

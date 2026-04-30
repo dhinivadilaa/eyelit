@@ -1,46 +1,37 @@
-// Components
 import { Form, Head } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { logout } from '@/routes';
-import { send } from '@/routes/verification';
 
 export default function VerifyEmail({ status }: { status?: string }) {
     return (
         <>
-            <Head title="Email verification" />
+            <Head title="Verifikasi Email" />
 
             {status === 'verification-link-sent' && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+                    Link verifikasi baru telah dikirim ke alamat email yang
+                    Anda daftarkan.
                 </div>
             )}
 
-            <Form {...send.form()} className="space-y-6 text-center">
-                {({ processing }) => (
-                    <>
-                        <Button disabled={processing} variant="secondary">
-                            {processing && <Spinner />}
-                            Resend verification email
-                        </Button>
+            <div className="text-sm text-muted-foreground mb-6">
+                Terima kasih telah mendaftar! Sebelum memulai, apakah Anda
+                bisa memverifikasi alamat email Anda dengan mengklik link yang
+                baru saja kami kirimkan ke email Anda?
+            </div>
 
-                        <TextLink
-                            href={logout()}
-                            className="mx-auto block text-sm"
-                        >
-                            Log out
-                        </TextLink>
-                    </>
-                )}
-            </Form>
+            <div className="text-center text-sm text-muted-foreground">
+                <TextLink href={logout()}>
+                    Keluar
+                </TextLink>
+            </div>
         </>
     );
 }
 
 VerifyEmail.layout = {
-    title: 'Verify email',
-    description:
-        'Please verify your email address by clicking on the link we just emailed to you.',
+    title: 'Verifikasi Email',
+    description: 'Verifikasi alamat email Anda',
 };
