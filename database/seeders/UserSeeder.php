@@ -12,9 +12,9 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
-                'name' => 'Admin EyeLit',
+                'username' => 'admin_eyelit',
                 'email' => 'admin@eyelit.com',
-                'password' => Hash::make('admin123'),
+                'password' => Hash::make('Admin123'),
                 'no_hp' => '081234567890',
                 'peran' => 'Admin',
                 'status_akun' => 'Aktif',
@@ -22,9 +22,9 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
             ],
             [
-                'name' => 'Pengguna Demo',
+                'username' => 'pengguna_demo',
                 'email' => 'pengguna@eyelit.com',
-                'password' => Hash::make('pengguna123'),
+                'password' => Hash::make('Pengguna123'),
                 'no_hp' => '089876543210',
                 'peran' => 'Pengguna',
                 'status_akun' => 'Aktif',

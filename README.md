@@ -37,8 +37,8 @@ Setelah migrate dan seed, akan tersedia data awal:
 
 | Peran  | Email              | Password    |
 |--------|--------------------|-------------|
-| Admin  | admin@eyelit.com   | admin123    |
-| Pengguna | pengguna@eyelit.com | pengguna123 |
+| Admin  | admin@eyelit.com   | Admin123    |
+| Pengguna | pengguna@eyelit.com | Pengguna123 |
 
 ### Data Lainnya
 - **Provinsi**: 38 provinsi di Indonesia

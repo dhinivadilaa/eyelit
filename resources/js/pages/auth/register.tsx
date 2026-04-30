@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 type FormErrors = {
-    name?: string;
+    username?: string;
     email?: string;
     no_hp?: string;
     password?: string;
@@ -22,7 +22,7 @@ export default function Register() {
     const [localErrors, setLocalErrors] = useState<FormErrors>({});
 
     const { data, setData, post, processing } = useForm({
-        name: '',
+        username: '',
         email: '',
         no_hp: '',
         password: '',
@@ -32,10 +32,12 @@ export default function Register() {
     const validateForm = (): FormErrors => {
         const errors: FormErrors = {};
 
-        if (!data.name.trim()) {
-            errors.name = 'Nama lengkap wajib diisi.';
-        } else if (data.name.trim().length < 2) {
-            errors.name = 'Nama lengkap minimal 2 karakter.';
+        if (!data.username.trim()) {
+            errors.username = 'Nama pengguna wajib diisi.';
+        } else if (!/^[a-zA-Z0-9]+$/.test(data.username)) {
+            errors.username = 'Nama pengguna hanya boleh huruf dan angka.';
+        } else if (data.username.trim().length < 6) {
+            errors.username = 'Nama pengguna minimal 6 karakter.';
         }
 
         if (!data.email.trim()) {
@@ -46,14 +48,16 @@ export default function Register() {
 
         if (!data.no_hp.trim()) {
             errors.no_hp = 'Nomor HP wajib diisi.';
-        } else if (!/^[0-9]{10,20}$/.test(data.no_hp.replace(/\s/g, ''))) {
-            errors.no_hp = 'Nomor HP harus berupa angka (10-20 digit).';
+        } else if (!/^[0-9]{11,12}$/.test(data.no_hp.replace(/\s/g, ''))) {
+            errors.no_hp = 'Nomor HP harus berupa angka (11-12 digit).';
         }
 
         if (!data.password) {
             errors.password = 'Kata sandi wajib diisi.';
         } else if (data.password.length < 8) {
             errors.password = 'Kata sandi minimal 8 karakter.';
+        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/.test(data.password)) {
+            errors.password = 'Kata sandi harus mengandung huruf besar, huruf kecil, dan angka.';
         }
 
         if (!data.password_confirmation) {
@@ -88,26 +92,26 @@ export default function Register() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                 <div className="grid gap-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Nama Lengkap</Label>
+                        <Label htmlFor="username">Nama Pengguna</Label>
                         <Input
-                            id="name"
+                            id="username"
                             type="text"
                             autoFocus
                             tabIndex={1}
-                            autoComplete="name"
-                            name="name"
-                            placeholder="Masukkan nama lengkap"
+                            autoComplete="username"
+                            name="username"
+                            placeholder="Masukkan nama pengguna"
                             className="h-10"
-                            value={data.name}
+                            value={data.username}
                             onChange={(e) => {
-                                setData('name', e.target.value);
-                                if (localErrors.name) {
-                                    setLocalErrors((prev) => ({ ...prev, name: undefined }));
+                                setData('username', e.target.value);
+                                if (localErrors.username) {
+                                    setLocalErrors((prev) => ({ ...prev, username: undefined }));
                                 }
                             }}
                         />
-                        {localErrors.name && (
-                            <p className="text-sm text-red-600">{localErrors.name}</p>
+                        {localErrors.username && (
+                            <p className="text-sm text-red-600">{localErrors.username}</p>
                         )}
                     </div>
 
