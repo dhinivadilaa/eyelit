@@ -2,13 +2,8 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, LogOut, Search, Settings, ShoppingBag, ShoppingCart, User } from 'lucide-react';
 import { useState, useRef } from 'react';
 
-export default function Welcome({
-    canRegister = true,
-}: {
-    canRegister?: boolean;
-}) {
-    const { auth } = usePage().props as any;
-    const isAdmin = auth.user?.peran === 'Admin';
+export default function Welcome() {
+    const { auth, produk } = usePage().props as any;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -182,137 +177,93 @@ export default function Welcome({
                                 </div>
                             </div>
 
-                            {auth.user ? (
-                                <>
-                                    {isAdmin && (
-                                        <Link
-                                            href="/dashboard"
-                                            className="px-4 py-1.5 text-sm font-medium text-[#1b1b18] hover:text-[#2264c0] transition-colors"
-                                        >
-                                            Dashboard
-                                        </Link>
-                                    )}
-
-                                    {/* User Dropdown */}
-                                    <div className="relative h-full flex items-center">
-                                        <div
-                                            onMouseEnter={() => {
-                                                if (userDropdownTimer.current) clearTimeout(userDropdownTimer.current);
-                                                setShowUserDropdown(true);
-                                            }}
-                                            onMouseLeave={() => {
-                                                userDropdownTimer.current = setTimeout(() => setShowUserDropdown(false), 100);
-                                            }}
-                                        >
-                                            <button className="icon-btn icon-user p-2 rounded-full hover:bg-gray-100">
-                                                <User className="size-5 text-[#1b1b18]" />
-                                            </button>
-                                            {showUserDropdown && (
-                                                <div
-                                                    className="dropdown-menu show"
-                                                    style={{ top: '64px', right: '24px' }}
-                                                    onMouseEnter={() => {
-                                                        if (userDropdownTimer.current) clearTimeout(userDropdownTimer.current);
-                                                    }}
-                                                    onMouseLeave={() => {
-                                                        userDropdownTimer.current = setTimeout(() => setShowUserDropdown(false), 100);
-                                                    }}
-                                                >
-                                                    <div className="dropdown-header">
-                                                        <div className="dropdown-avatar">
-                                                            {auth.user?.username?.charAt(0).toUpperCase()}
-                                                        </div>
-                                                        <div className="dropdown-user-info">
-                                                            <span className="dropdown-user-name">{auth.user?.username}</span>
-                                                            <span className="dropdown-user-email">{auth.user?.email}</span>
-                                                        </div>
+                            {/* User Dropdown */}
+                            {auth.user && (
+                                <div className="relative h-full flex items-center">
+                                    <div
+                                        onMouseEnter={() => {
+                                            if (userDropdownTimer.current) clearTimeout(userDropdownTimer.current);
+                                            setShowUserDropdown(true);
+                                        }}
+                                        onMouseLeave={() => {
+                                            userDropdownTimer.current = setTimeout(() => setShowUserDropdown(false), 100);
+                                        }}
+                                    >
+                                        <button className="icon-btn icon-user p-2 rounded-full hover:bg-gray-100">
+                                            <User className="size-5 text-[#1b1b18]" />
+                                        </button>
+                                        {showUserDropdown && (
+                                            <div
+                                                className="dropdown-menu show"
+                                                style={{ top: '64px', right: '24px' }}
+                                                onMouseEnter={() => {
+                                                    if (userDropdownTimer.current) clearTimeout(userDropdownTimer.current);
+                                                }}
+                                                onMouseLeave={() => {
+                                                    userDropdownTimer.current = setTimeout(() => setShowUserDropdown(false), 100);
+                                                }}
+                                            >
+                                                <div className="dropdown-header">
+                                                    <div className="dropdown-avatar">
+                                                        {auth.user?.username?.charAt(0).toUpperCase()}
                                                     </div>
-                                                    <div className="dropdown-body">
-                                                        <Link href="#" className="dropdown-item">
-                                                            <ShoppingBag className="size-5" />
-                                                            Pembelian
-                                                        </Link>
-                                                        <Link href="/user/profile" className="dropdown-item">
-                                                            <Settings className="size-5" />
-                                                            Pengaturan
-                                                        </Link>
-                                                        <form method="POST" action="/logout">
-                                                            <input type="hidden" name="_token" value={auth.csrf} />
-                                                            <button type="submit" className="dropdown-item logout w-full text-left">
-                                                                <LogOut className="size-5" />
-                                                                Keluar Akun
-                                                            </button>
-                                                        </form>
+                                                    <div className="dropdown-user-info">
+                                                        <span className="dropdown-user-name">{auth.user?.username}</span>
+                                                        <span className="dropdown-user-email">{auth.user?.email}</span>
                                                     </div>
                                                 </div>
-                                            )}
-                                        </div>
+                                                <div className="dropdown-body">
+                                                    <Link href="#" className="dropdown-item">
+                                                        <ShoppingBag className="size-5" />
+                                                        Pembelian
+                                                    </Link>
+                                                    <Link href="/user/profile" className="dropdown-item">
+                                                        <Settings className="size-5" />
+                                                        Pengaturan
+                                                    </Link>
+                                                    <form method="POST" action="/logout">
+                                                        <input type="hidden" name="_token" value={auth.csrf} />
+                                                        <button type="submit" className="dropdown-item logout w-full text-left">
+                                                            <LogOut className="size-5" />
+                                                            Keluar Akun
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                </>
-                            ) : (
-                                <>
-                                    <Link
-                                        href="/login"
-                                        className="px-4 py-1.5 text-sm font-medium text-[#1b1b18] hover:text-[#2264c0] transition-colors"
-                                    >
-                                        Masuk
-                                    </Link>
-                                    {canRegister && (
-                                        <Link
-                                            href="/register"
-                                            className="px-4 py-1.5 text-sm font-medium bg-[#2264c0] text-white rounded-full hover:bg-[#1a4f9a] transition-colors"
-                                        >
-                                            Daftar
-                                        </Link>
-                                    )}
-                                </>
+                                </div>
                             )}
                         </div>
                     </div>
                 </nav>
 
-                {/* Hero Section */}
-                <main className="mx-auto max-w-7xl px-4 py-16">
-                    <div className="text-center">
-                        <h1 className="text-4xl font-bold text-[#1b1b18] mb-4">
-                            Selamat Datang di EyeLit
-                        </h1>
-                        <p className="text-lg text-[#706f6c] mb-8">
-                            Kacamata pilihan terbaik untuk gaya hidup Anda
-                        </p>
-                        <div className="flex justify-center gap-4">
-                            {auth.user ? (
-                                <>
-                                    {isAdmin && (
-                                        <Link
-                                            href="/dashboard"
-                                            className="rounded-sm bg-[#2264c0] px-6 py-2 text-white font-medium hover:bg-[#1a4f9a]"
-                                        >
-                                            Lihat Dashboard
-                                        </Link>
-                                    )}
-                                </>
-                            ) : (
-                                <>
-                                    <Link
-                                        href="/login"
-                                        className="rounded-sm border border-[#19140035] bg-white px-6 py-2 text-[#1b1b18] font-medium hover:bg-gray-50"
-                                    >
-                                        Masuk
-                                    </Link>
-                                    {canRegister && (
-                                        <Link
-                                            href="/register"
-                                            className="rounded-sm bg-[#2264c0] px-6 py-2 text-white font-medium hover:bg-[#1a4f9a]"
-                                        >
-                                            Daftar Sekarang
-                                        </Link>
-                                    )}
-                                </>
-                            )}
-                        </div>
+                {/* Grid Box Section */}
+                <section className="pb-8">
+                    <div className="grid-container">
+                        {produk && produk.map((item: any) => (
+                            <Link key={item.id} href={`/produk/${item.id}`} className="grid-box">
+                                <div className="grid-box-content">
+                                    <img
+                                        className="grid-box-image"
+                                        src={`/images/produk/${item.gambar}`}
+                                        alt={item.nama_produk}
+                                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                    />
+                                    <div className="grid-box-overlay">
+                                        <div className="grid-box-overlay-bottom">
+                                            <div className="grid-box-left">
+                                                <div className="grid-box-merek">{item.merek}</div>
+                                                <div className="grid-box-tipe">{item.tipe_produk}</div>
+                                            </div>
+                                            <span className="grid-box-harga">Rp {(Number(item.harga_produk) || 0).toLocaleString('id-ID')}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
                     </div>
-                </main>
+                </section>
             </div>
         </>
     );
