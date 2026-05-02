@@ -163,3 +163,127 @@ File yang perlu diedit untuk mengubah gambar/logo:
 - `resources/js/layouts/auth/auth-split-layout.tsx` - layout auth (login & register), di sin logo dan background diatur
 - `resources/js/pages/auth/login.tsx` - halaman login
 - `resources/js/pages/auth/register.tsx` - halaman register
+
+---
+
+# Template Gambar Produk EyeLit - Katalog
+
+Dokumen ini menjelaskan spesifikasi gambar thumbnail untuk setiap produk di halaman katalog.
+
+---
+
+## Struktur Folder Gambar Produk
+
+```
+public/
+└── images/
+    └── produk/
+        ├── hu-1388-003-55.png      # Hugo F-HU 1388 003 55
+        ├── gd-ga03452-05-53.png    # Giordano F-GD-GA03452 05 53
+        ├── gd-ga02971-03-55.png    # Giordano F-GD-GA02971 03 55
+        └── qi-qa7010-b30-51.png    # Qina F-QI QA7010 B30 51
+```
+
+---
+
+## Detail Gambar Produk
+
+### 1. `hu-1388-003-55.png` - Hugo F-HU 1388 003 55
+**Lokasi file:** `public/images/produk/hu-1388-003-55.png`
+
+**Spesifikasi gambar:**
+- Ukuran ideal: **600 x 600 pixel** (rasio 1:1 - square)
+- Format: PNG atau JPG
+- Isi: Foto produk kacamata Hugo F-HU 1388 003 55
+- Background: Putih atau transparan
+
+**Tampilan di grid-box:**
+```
++--------------+
+|              |
+|   GAMBAR     |  <-- aspect ratio 1:1
+|   PRODUK     |
+|              |
++--------------+
+Kacamata Model A      <-- nama produk (hitam)
+Rp 500.000           <-- harga (hitam)
+```
+
+---
+
+### 2. `gd-ga03452-05-53.png` - Giordano F-GD-GA03452 05 53
+**Lokasi file:** `public/images/produk/gd-ga03452-05-53.png`
+
+**Spesifikasi gambar:**
+- Ukuran ideal: **600 x 600 pixel** (rasio 1:1 - square)
+- Format: PNG atau JPG
+- Isi: Foto produk kacamata Giordano F-GD-GA03452 05 53
+
+---
+
+### 3. `gd-ga02971-03-55.png` - Giordano F-GD-GA02971 03 55
+**Lokasi file:** `public/images/produk/gd-ga02971-03-55.png`
+
+**Spesifikasi gambar:**
+- Ukuran ideal: **600 x 600 pixel** (rasio 1:1 - square)
+- Format: PNG atau JPG
+- Isi: Foto produk kacamata Giordano F-GD-GA02971 03 55
+
+---
+
+### 4. `qi-qa7010-b30-51.png` - Qina F-QI QA7010 B30 51
+**Lokasi file:** `public/images/produk/qi-qa7010-b30-51.png`
+
+**Spesifikasi gambar:**
+- Ukuran ideal: **600 x 600 pixel** (rasio 1:1 - square)
+- Format: PNG atau JPG
+- Isi: Foto produk kacamata Qina F-QI QA7010 B30 51
+
+---
+
+## Cara Menyalin Gambar Produk
+
+### Langkah 1: Buat folder
+```bash
+mkdir -p public/images/produk
+```
+
+### Langkah 2: Salin gambar
+Salin file gambar Anda ke folder tersebut dengan nama:
+- `hu-1388-003-55.png`
+- `gd-ga03452-05-53.png`
+- `gd-ga02971-03-55.png`
+- `qi-qa7010-b30-51.png`
+
+### Langkah 3: Update welcome.tsx
+Pastikan welcome.tsx sudah mengambil data dari database dan menampilkan gambar produk dari path yang benar.
+
+---
+
+## Checklist Sebelum Menjalankan
+
+- [ ] Folder `public/images/produk/` sudah dibuat
+- [ ] File `hu-1388-003-55.png` sudah ada
+- [ ] File `gd-ga03452-05-53.png` sudah ada
+- [ ] File `gd-ga02971-03-55.png` sudah ada
+- [ ] File `qi-qa7010-b30-51.png` sudah ada
+- [ ] Jalankan `php artisan migrate:fresh --seed` untuk seed data
+- [ ] Jalankan `npm run dev` untuk melihat hasilnya
+
+---
+
+## Catatan Penting
+
+1. **Nama file HARUS persis** seperti berikut (case-sensitive, gunakan huruf kecil dan hyphen):
+   - `hu-1388-003-55.png`
+   - `gd-ga03452-05-53.png`
+   - `gd-ga02971-03-55.png`
+   - `qi-qa7010-b30-51.png`
+
+2. **Format yang didukung:** PNG, JPG, JPEG, WebP
+
+3. **Ukuran ideal 600x600** tapi bisa lebih besar atau lebih kecil. Yang penting rasio 1:1 (square).
+
+4. **Background transparan** lebih baik agar terlihat profesional, tapi bisa juga dengan background putih.
+
+5. Gambar harus jelas dan focus pada produk kacamata saja.

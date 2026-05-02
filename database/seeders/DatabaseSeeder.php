@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             EkspedisiSeeder::class,
             LensaSeeder::class,
             UserSeeder::class,
+            ProdukSeeder::class,
         ]);
     }
 }
