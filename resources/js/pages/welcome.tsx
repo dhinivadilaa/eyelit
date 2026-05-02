@@ -102,8 +102,8 @@ export default function Welcome() {
                             <span className="text-2xl font-bold text-[#2264c0]">EyeLit</span>
                         </Link>
 
-                        {/* Search Bar - Center */}
-                        <div className="flex-1 max-w-lg ml-[90px]">
+                        {/* Search Bar - Center (hide on mobile <440px) */}
+                        <div className="flex-1 max-w-lg ml-[90px] max-[439px]:hidden">
                             <div className="relative">
                                 <input
                                     type="text"
@@ -142,8 +142,8 @@ export default function Welcome() {
                                     </button>
                                     {showNotifDropdown && (
                                         <div
-                                            className="dropdown-menu show"
-                                            style={{ top: '64px', right: '130px' }}
+                                            className="dropdown-menu show max-[439px]:left-4 max-[439px]:right-4 max-[439px]:translate-x-0"
+                                            style={{ top: '64px', right: '24px' }}
                                             onMouseEnter={() => {
                                                 if (notifDropdownTimer.current) clearTimeout(notifDropdownTimer.current);
                                             }}
@@ -208,8 +208,8 @@ export default function Welcome() {
                                     </button>
                                     {showCartDropdown && (
                                         <div
-                                            className="dropdown-menu show"
-                                            style={{ top: '64px', right: '90px' }}
+                                            className="dropdown-menu show max-[439px]:left-4 max-[439px]:right-4 max-[439px]:translate-x-0"
+                                            style={{ top: '64px', right: '24px' }}
                                             onMouseEnter={() => {
                                                 if (cartDropdownTimer.current) clearTimeout(cartDropdownTimer.current);
                                             }}
@@ -269,7 +269,7 @@ export default function Welcome() {
                                         </button>
                                         {showUserDropdown && (
                                             <div
-                                                className="dropdown-menu show"
+                                                className="dropdown-menu show max-[439px]:left-4 max-[439px]:right-4 max-[439px]:translate-x-0"
                                                 style={{ top: '64px', right: '24px' }}
                                                 onMouseEnter={() => {
                                                     if (userDropdownTimer.current) clearTimeout(userDropdownTimer.current);
@@ -387,7 +387,7 @@ export default function Welcome() {
                     {/* Row 1: Produk 1-5, shift to 2-5 */}
                     <div className="flex w-full overflow-hidden">
                         {[0,1,2,3,4,1,2,3].map((idx: number) => (
-                            <div key={`r1-${idx}`} className="w-1/4 shrink-0">
+                            <div key={`r1-${idx}`} className="w-1/4 shrink-0 grid-row-item">
                                 <Link href={`/produk/${produk?.[idx]?.id}`} className="grid-box block animate-row">
                                     <div className="grid-box-content">
                                         <img className="grid-box-image" src={`/images/produk/${produk?.[idx]?.gambar}`} alt={produk?.[idx]?.nama_produk} onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }} />
@@ -411,7 +411,7 @@ export default function Welcome() {
                 <section className="overflow-hidden">
                     <div className="flex w-full overflow-hidden">
                         {[6,7,8,9,7,8,9,10].map((idx: number) => (
-                            <div key={`r2-${idx}`} className="w-1/4 shrink-0">
+                            <div key={`r2-${idx}`} className="w-1/4 shrink-0 grid-row-item">
                                 <Link href={`/produk/${produk?.[idx]?.id}`} className="grid-box block animate-row-delay-2" style={{animationName: 'slide-left-row'}}>
                                     <div className="grid-box-content">
                                         <img className="grid-box-image" src={`/images/produk/${produk?.[idx]?.gambar}`} alt={produk?.[idx]?.nama_produk} onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }} />
@@ -435,7 +435,7 @@ export default function Welcome() {
                 <section className="overflow-hidden">
                     <div className="flex w-full overflow-hidden">
                         {[10,11,12,13,14,11,12,13].map((idx: number) => (
-                            <div key={`r3-${idx}`} className="w-1/4 shrink-0">
+                            <div key={`r3-${idx}`} className="w-1/4 shrink-0 grid-row-item">
                                 <Link href={`/produk/${produk?.[idx]?.id}`} className="grid-box block animate-row-delay-4">
                                     <div className="grid-box-content">
                                         <img className="grid-box-image" src={`/images/produk/${produk?.[idx]?.gambar}`} alt={produk?.[idx]?.nama_produk} onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }} />
