@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 export default function Welcome() {
     const { auth, produk } = usePage().props as any;
@@ -17,6 +17,77 @@ export default function Welcome() {
     const cartItems: any[] = auth.user?.cartItems || [];
     // Mock notifications - replace with actual data from backend
     const notifications: any[] = auth.user?.notifications || [];
+
+    // Carousel data - add new information slides here
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [imageAnimClass, setImageAnimClass] = useState('');
+    const [textAnimClass, setTextAnimClass] = useState('');
+    const [buttonAnimClass, setButtonAnimClass] = useState('');
+
+    const slides = [
+        {
+            image: '/images/carousel/informasi-1.png',
+            title: 'Gratis Pengiriman ke Seluruh Indonesia',
+            description: 'Nikmati bebas biaya pengiriman untuk setiap pemesanan. Kami mengirim ke lebih dari 100 kota di Indonesia dengan jaminan keamanan paket hingga tujuan.',
+        },
+        {
+            image: '/images/carousel/informasi-2.png',
+            title: 'Lensa Berkualitas Tinggi untuk Penglihatan Optimal',
+            description: 'Setiap kacamata EyeLit dilengkapi dengan lensa premium yang telah teruji ketajaman optiknya. Dirancang untuk kenyamanan seharian dengan coating anti-refleksi dan anti-gores.',
+        },
+    ];
+
+    const handlePrev = () => {
+        setImageAnimClass('carousel-image-out');
+        setTextAnimClass('carousel-text-out');
+        setButtonAnimClass('carousel-button-click');
+
+        setTimeout(() => {
+            setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+            setImageAnimClass('carousel-image-in');
+            setTextAnimClass('carousel-text-in');
+            setButtonAnimClass('');
+            setTimeout(() => {
+                setImageAnimClass('');
+                setTextAnimClass('');
+            }, 250);
+        }, 400);
+    };
+
+    const handleNext = () => {
+        setImageAnimClass('carousel-image-out');
+        setTextAnimClass('carousel-text-out');
+        setButtonAnimClass('carousel-button-click');
+
+        setTimeout(() => {
+            setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+            setImageAnimClass('carousel-image-in');
+            setTextAnimClass('carousel-text-in');
+            setButtonAnimClass('');
+            setTimeout(() => {
+                setImageAnimClass('');
+                setTextAnimClass('');
+            }, 250);
+        }, 400);
+    };
+
+    // Auto-play carousel every 6 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setImageAnimClass('carousel-image-out');
+            setTextAnimClass('carousel-text-out');
+            setTimeout(() => {
+                setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+                setImageAnimClass('carousel-image-in');
+                setTextAnimClass('carousel-text-in');
+                setTimeout(() => {
+                    setImageAnimClass('');
+                    setTextAnimClass('');
+                }, 250);
+            }, 400);
+        }, 6000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <>
@@ -254,6 +325,63 @@ export default function Welcome() {
                     </div>
                 </nav>
 
+                {/* Carousel Section */}
+                <section className="py-16 bg-white">
+                    <div className="container mx-auto px-4">
+                        <div className="flex flex-col lg:flex-row items-center gap-12">
+                            {/* Left: Image */}
+                            <div className="w-full lg:w-1/2">
+                                <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                                    <img
+                                        src={slides[currentSlide].image}
+                                        alt={slides[currentSlide].title}
+                                        className={`w-full h-auto transition-opacity duration-300 ${imageAnimClass}`}
+                                    />
+                                </div>
+                            </div>
+                            {/* Right: Text Content */}
+                            <div className="w-full lg:w-1/2 text-center lg:text-left">
+                                <h2 className={`text-3xl lg:text-4xl font-bold text-[#1b1b18] mb-4 leading-tight ${textAnimClass}`}>
+                                    {slides[currentSlide].title}
+                                </h2>
+                                <p className={`text-[#5f6368] text-base lg:text-lg leading-relaxed mb-8 ${textAnimClass}`}>
+                                    {slides[currentSlide].description}
+                                </p>
+                                <div className="flex items-center gap-4 justify-center lg:justify-start">
+                                    <button
+                                        onClick={handlePrev}
+                                        className="w-12 h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-white">
+                                            <path d="m15 18-6-6 6-6"/>
+                                        </svg>
+                                    </button>
+                                    <div className="flex gap-2">
+                                        {slides.map((_, index) => (
+                                            <span
+                                                key={index}
+                                                className={`w-3 h-3 rounded-full transition-colors ${
+                                                    index === currentSlide
+                                                        ? 'bg-[#2264c0] carousel-dot-active'
+                                                        : 'bg-[#2264c0]/30'
+                                                }`}
+                                            />
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={handleNext}
+                                        className="w-12 h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-white">
+                                            <path d="m9 18 6-6-6-6"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Grid Box Section */}
                 <section className="overflow-hidden">
                     {/* Row 1: Produk 1-5, shift to 2-5 */}
@@ -277,7 +405,10 @@ export default function Welcome() {
                             </div>
                         ))}
                     </div>
-                    {/* Row 2: Produk 6-10, shift to 7-10 */}
+                </section>
+
+                {/* Row 2: Produk 6-10, shift to 7-10 */}
+                <section className="overflow-hidden">
                     <div className="flex w-full overflow-hidden">
                         {[6,7,8,9,7,8,9,10].map((idx: number) => (
                             <div key={`r2-${idx}`} className="w-1/4 shrink-0">
@@ -298,7 +429,10 @@ export default function Welcome() {
                             </div>
                         ))}
                     </div>
-                    {/* Row 3: Produk 11-15, shift to 12-15 */}
+                </section>
+
+                {/* Row 3: Produk 11-15, shift to 12-15 */}
+                <section className="overflow-hidden">
                     <div className="flex w-full overflow-hidden">
                         {[10,11,12,13,14,11,12,13].map((idx: number) => (
                             <div key={`r3-${idx}`} className="w-1/4 shrink-0">

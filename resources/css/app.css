@@ -780,3 +780,44 @@
     opacity: 1;
     transform: translateY(0);
 }
+
+/* Carousel Slide Animations */
+@keyframes carousel-image-fade-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes carousel-image-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes carousel-text-fade-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes carousel-text-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes carousel-dot-scale {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+}
+
+@keyframes carousel-button-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 100, 192, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(34, 100, 192, 0); }
+}
+
+.carousel-image-out { animation: carousel-image-fade-out 0.4s ease-out forwards; }
+.carousel-image-in { animation: carousel-image-fade-in 0.4s ease-in forwards; }
+
+.carousel-text-out { animation: carousel-text-fade-out 0.25s ease-out forwards; }
+.carousel-text-in { animation: carousel-text-fade-in 0.25s ease-in forwards; }
+
+.carousel-dot-active { animation: carousel-dot-scale 0.3s ease-out forwards; }
+
+.carousel-button-click { animation: carousel-button-pulse 0.6s ease-out; }
