@@ -13,7 +13,16 @@ class ProdukController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return Inertia::render('welcome', [
+        return Inertia::render('katalog', [
+            'produk' => $produk,
+        ]);
+    }
+
+    public function show(Produk $produk)
+    {
+        $produk->load(['gambar_produk']);
+        
+        return Inertia::render('produk-detail', [
             'produk' => $produk,
         ]);
     }
