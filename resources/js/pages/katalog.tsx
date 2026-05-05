@@ -225,8 +225,13 @@ export default function Katalog() {
                                                 <div className="max-h-80 overflow-y-auto">
                                                     {cartItems.map((item: any, index: number) => (
                                                         <div key={index} className="dropdown-cart-item">
-                                                            <div className="dropdown-cart-image">
-                                                                <img src={item.gambar || '/images/placeholder.png'} alt={item.nama} />
+                                                            <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f3f4f6', flexShrink: 0 }}>
+                                                                <img
+                                                                    src={`/images/produk/${item.gambar}`}
+                                                                    alt={item.nama}
+                                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                                                />
                                                             </div>
                                                             <div className="dropdown-cart-info">
                                                                 <p className="dropdown-cart-name">{item.nama}</p>

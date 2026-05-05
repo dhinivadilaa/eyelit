@@ -502,10 +502,11 @@ export default function ProdukDetail() {
                                                     <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
                                                         {cartItems.map((item: any, index: number) => (
                                                             <div key={index} className="dropdown-cart-item">
-                                                                <div className="dropdown-cart-image">
+                                                                <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f3f4f6', flexShrink: 0 }}>
                                                                     <img
                                                                         src={`/images/produk/${item.gambar}`}
                                                                         alt={item.nama}
+                                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                                         onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
                                                                     />
                                                                 </div>
