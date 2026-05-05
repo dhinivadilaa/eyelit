@@ -607,6 +607,36 @@ html.dark {
     color: #1b1b18;
 }
 
+/* HP Kecil (355px - 395px) - teks lebih compact */
+@media (min-width: 355px) and (max-width: 394px) {
+    .grid-box-merek {
+        font-size: 11px;
+    }
+
+    .grid-box-harga {
+        font-size: 11px;
+    }
+
+    .grid-box-tipe {
+        font-size: 8px;
+    }
+}
+
+/* HP Besar (395px - 439px) - kembalikan ukuran normal */
+@media (min-width: 395px) and (max-width: 439px) {
+    .grid-box-merek {
+        font-size: 14px;
+    }
+
+    .grid-box-harga {
+        font-size: 16px;
+    }
+
+    .grid-box-tipe {
+        font-size: 11px;
+    }
+}
+
 /* Tablet Responsive */
 @media (min-width: 768px) and (max-width: 1024px) {
     .grid-box-merek {

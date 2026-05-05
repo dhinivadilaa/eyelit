@@ -331,9 +331,9 @@ export default function Welcome() {
                 </nav>
 
                 {/* Carousel Section */}
-                <section className="py-16 bg-white">
+                <section className="py-8 sm:py-16 bg-white">
                     <div className="container mx-auto px-4">
-                        <div className="flex flex-col lg:flex-row items-center gap-12">
+                        <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-12">
                             {/* Left: Image */}
                             <div className="w-full lg:w-1/2">
                                 <div className="relative rounded-2xl overflow-hidden shadow-xl">
@@ -346,18 +346,18 @@ export default function Welcome() {
                             </div>
                             {/* Right: Text Content */}
                             <div className="w-full lg:w-1/2 text-center lg:text-left">
-                                <h2 className={`text-3xl lg:text-4xl font-bold text-[#1b1b18] mb-4 leading-tight ${textAnimClass}`}>
+                                <h2 className={`text-xl sm:text-2xl lg:text-4xl font-bold text-[#1b1b18] mb-3 sm:mb-4 leading-tight ${textAnimClass}`}>
                                     {slides[currentSlide].title}
                                 </h2>
-                                <p className={`text-[#5f6368] text-base lg:text-lg leading-relaxed mb-8 ${textAnimClass}`}>
+                                <p className={`text-[#5f6368] text-xs sm:text-sm lg:text-lg leading-relaxed mb-6 sm:mb-8 ${textAnimClass}`}>
                                     {slides[currentSlide].description}
                                 </p>
-                                <div className="flex items-center gap-4 justify-center lg:justify-start">
+                                <div className="flex items-center gap-3 sm:gap-4 justify-center lg:justify-start">
                                     <button
                                         onClick={handlePrev}
-                                        className="w-12 h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                        className="w-10 h-10 sm:w-12 sm:h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4 sm:size-6 text-white">
                                             <path d="m15 18-6-6 6-6"/>
                                         </svg>
                                     </button>
@@ -365,7 +365,7 @@ export default function Welcome() {
                                         {slides.map((_, index) => (
                                             <span
                                                 key={index}
-                                                className={`w-3 h-3 rounded-full transition-colors ${
+                                                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-colors ${
                                                     index === currentSlide
                                                         ? 'bg-[#2264c0] carousel-dot-active'
                                                         : 'bg-[#2264c0]/30'
@@ -375,9 +375,9 @@ export default function Welcome() {
                                     </div>
                                     <button
                                         onClick={handleNext}
-                                        className="w-12 h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                        className="w-10 h-10 sm:w-12 sm:h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4 sm:size-6 text-white">
                                             <path d="m9 18 6-6-6-6"/>
                                         </svg>
                                     </button>
@@ -461,17 +461,17 @@ export default function Welcome() {
                 </section>
 
                 {/* CTA Section */}
-                <section className="bg-[#2264c0] py-16 overflow-hidden relative group cursor-pointer">
+                <section className="bg-[#2264c0] py-8 sm:py-16 overflow-hidden relative group cursor-pointer">
                     <div className="mx-auto max-w-7xl px-4 flex items-center justify-between gap-8 relative z-10">
                         <div>
-                            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Cari Lebih Banyak Gayamu</h2>
-                            <p className="text-white/80">Temukan kacamata yang sempurna untuk gaya hidupmu.</p>
+                            <h2 className="text-lg sm:text-xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">Cari Lebih Banyak Gayamu</h2>
+                            <p className="text-white/80 text-xs sm:text-sm">Temukan kacamata yang sempurna untuk gaya hidupmu.</p>
                         </div>
                     </div>
                     {/* White Block - slides to left 100% on hover */}
                     <div className="absolute top-0 right-0 w-0 h-full bg-white overflow-hidden group-hover:w-full transition-all duration-500 ease-out flex items-center justify-center z-20">
                         <div className="text-center">
-                            <span className="cta-text block text-3xl md:text-5xl font-black text-[#2264c0]">
+                            <span className="cta-text block text-xl sm:text-2xl lg:text-5xl font-black text-[#2264c0]">
                                 Koleksi Terlengkap<br/>untuk Gaya Hidupmu
                             </span>
                         </div>
@@ -480,8 +480,8 @@ export default function Welcome() {
 
                 {/* Footer */}
                 <footer className="bg-[#1b1b18] text-white">
-                    <div className="mx-auto max-w-7xl px-4 py-16">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                    <div className="mx-auto max-w-7xl px-4 py-8 sm:py-16">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-12">
                             {/* Brand */}
                             <div className="lg:col-span-1">
                                 <Link href="/" className="flex items-center gap-2 mb-5">

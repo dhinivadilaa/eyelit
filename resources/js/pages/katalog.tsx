@@ -328,10 +328,10 @@ export default function Katalog() {
 
                 {/* Search Section */}
                 <section className="bg-white border-b border-[#19140035]">
-                    <div className="mx-auto max-w-7xl px-4 py-6">
-                        <div className="flex flex-col gap-4">
-                            <h2 className="text-2xl font-bold text-[#1b1b18] text-center">Temukan Kacamata Impianmu</h2>
-                            <p className="text-center text-[#5f6368] text-sm">Jelajahi berbagai koleksi kacamata terbaru dari berbagai merek ternama</p>
+                    <div className="mx-auto max-w-7xl px-4 py-4 sm:py-6">
+                        <div className="flex flex-col gap-3 sm:gap-4">
+                            <h2 className="text-xl sm:text-2xl font-bold text-[#1b1b18] text-center">Temukan Kacamata Impianmu</h2>
+                            <p className="text-center text-[#5f6368] text-xs sm:text-sm">Jelajahi berbagai koleksi kacamata terbaru dari berbagai merek ternama</p>
                             {/* Main Search Bar */}
                             <div className="w-full max-w-2xl mx-auto">
                                 <div className="relative">
@@ -353,10 +353,10 @@ export default function Katalog() {
                 <section className="bg-white">
                     <div className="mx-auto max-w-7xl px-4 py-4">
                         <div className="flex items-center justify-between">
-                            <p className="text-sm font-semibold text-[#1b1b18]"><span>{filteredProduk?.length || 0}</span> produk ditemukan</p>
+                            <p className="text-xs sm:text-sm font-semibold text-[#1b1b18]"><span>{filteredProduk?.length || 0}</span> produk ditemukan</p>
                             <button
                                 onClick={() => setShowFilter(true)}
-                                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${hasActiveFilters ? 'bg-[#2264c0] text-white hover:bg-[#1a4f9a]' : 'bg-white text-[#1b1b18] border border-[#19140035] hover:bg-gray-50'}`}
+                                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-full transition-colors ${hasActiveFilters ? 'bg-[#2264c0] text-white hover:bg-[#1a4f9a]' : 'bg-white text-[#1b1b18] border border-[#19140035] hover:bg-gray-50'}`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="4" x2="20" y1="6" y2="6"/>
@@ -390,7 +390,7 @@ export default function Katalog() {
                         <div className={`fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-xl overflow-y-auto ${showFilter && !filterClosing ? 'filter-panel-enter' : ''} ${filterClosing ? 'filter-panel-exit' : ''}`}>
                             {/* Header */}
                             <div className="flex items-center justify-between p-4 border-b border-[#19140035]">
-                                <h3 className="text-lg font-semibold text-[#1b1b18]">Filter</h3>
+                                <h3 className="text-base sm:text-lg font-semibold text-[#1b1b18]">Filter</h3>
                                 <button
                                     onClick={() => {
                                         setBackdropClosing(true);

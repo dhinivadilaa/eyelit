@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ArrowLeft, Bell, BookOpen, Check, LogOut, Minus, Plus, Settings, ShoppingBag, ShoppingCart, Trash2, User } from 'lucide-react';
+import { Bell, BookOpen, Check, LogOut, Minus, Plus, Settings, ShoppingBag, ShoppingCart, Trash2, User } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 interface KeranjangItem {
@@ -179,11 +179,6 @@ export default function Keranjang() {
 
                 {/* Konten */}
                 <main className="mx-auto max-w-7xl px-4 pb-16">
-                    <Link href="/katalog" className="inline-flex items-center gap-2 text-sm text-[#5f6368] hover:text-[#2264c0] transition-colors mb-6">
-                        <ArrowLeft className="size-4" />
-                        Lanjut Belanja
-                    </Link>
-
                     <h1 className="text-2xl font-bold text-[#1b1b18] mb-6">Keranjang Belanja</h1>
 
                     {items.length === 0 ? (
