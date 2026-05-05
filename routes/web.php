@@ -15,7 +15,6 @@ Route::get('/katalog', [ProdukController::class, 'index'])->name('katalog');
 
 Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 
-Route::inertia('/welcome', 'welcome')->name('welcome');
 
 Route::get('/username-check', UsernameCheckController::class)->name('username.check');
 Route::get('/email-check', EmailCheckController::class)->name('email.check');

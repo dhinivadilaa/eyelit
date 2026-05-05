@@ -584,7 +584,7 @@ export default function Katalog() {
                     <div className="flex flex-wrap">
                         {filteredProduk?.map((item: any, index: number) => (
                             <div key={index} className="w-1/4 shrink-0 grid-row-item">
-                                <div className="grid-box">
+                                <Link href={`/produk/${item.id}`} className="grid-box block">
                                     <div className="grid-box-content">
                                         <img
                                             className="grid-box-image"
@@ -602,7 +602,7 @@ export default function Katalog() {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             </div>
                         ))}
                     </div>
