@@ -19,9 +19,9 @@ Dokumen ini menjelaskan breakpoint responsive yang digunakan pada website EyeLit
 
 | Device | Produk per Baris | Ukuran Teks |
 |--------|-----------------|-------------|
-| HP Kecil (355px - 394px) | 2 produk | Merek 11px, Harga 11px, Tipe 8px |
-| HP Besar (395px - 439px) | 2 produk | Merek 14px, Harga 16px, Tipe 11px |
-| Tablet (440px - 1024px) | 4 produk | Merek 12px, Harga 14px, Tipe disembunyikan |
+| HP Kecil (355px - 394px) | 2 produk | Merek 11px, Harga 10px, Tipe 8px |
+| HP Besar (395px - 439px) | 2 produk | Merek 11px, Harga 10px, Tipe 8px |
+| Tablet (440px - 1024px) | 4 produk | Merek 12px, Harga 11px, Tipe disembunyikan |
 | Desktop (> 1024px) | 4 produk | Merek 16px, Harga 18px, Tipe 12px |
 
 ---
@@ -44,21 +44,21 @@ Dokumen ini menjelaskan breakpoint responsive yang digunakan pada website EyeLit
 /* HP Kecil (355px - 394px) */
 @media (min-width: 355px) and (max-width: 394px) {
     .grid-box-merek { font-size: 11px; }
-    .grid-box-harga { font-size: 11px; }
+    .grid-box-harga { font-size: 10px; }
     .grid-box-tipe  { font-size: 8px; }
 }
 
 /* HP Besar (395px - 439px) */
 @media (min-width: 395px) and (max-width: 439px) {
-    .grid-box-merek { font-size: 14px; }
-    .grid-box-harga { font-size: 16px; }
-    .grid-box-tipe  { font-size: 11px; }
+    .grid-box-merek { font-size: 11px; }
+    .grid-box-harga { font-size: 10px; }
+    .grid-box-tipe  { font-size: 8px; }
 }
 
-/* Tablet specific (440px - 1024px) */
-@media (min-width: 440px) and (max-width: 1024px) {
+/* Tablet specific (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
     .grid-box-merek { font-size: 12px; }
-    .grid-box-harga { font-size: 14px; }
+    .grid-box-harga { font-size: 11px; }
     .grid-box-tipe  { display: none; }
 }
 ```
@@ -72,6 +72,36 @@ Dokumen ini menjelaskan breakpoint responsive yang digunakan pada website EyeLit
 | `lg:` | 1024px | `lg:flex` |
 | `xl:` | 1280px | `xl:text-2xl` |
 | `2xl:` | 1536px | `2xl:max-w-7xl` |
+
+---
+
+## Keranjang - Item Card
+
+| Device | Padding | Gap | Merek | Nama Produk | Tipe | Harga | Image |
+|--------|---------|-----|-------|-------------|------|-------|-------|
+| HP Kecil (355px - 394px) | 12px | 10px | 9px | 11px | 9px | 11px | 64x64 |
+| HP Besar (395px - 439px) | 14px | 12px | 10px | 12px | 10px | 12px | 64x64 |
+| Tablet/Desktop | 16px | 16px | 12px | 14px | 12px | 14px | 96x96 |
+
+---
+
+## Keranjang - Lens Card Info
+
+| Device | Font Size |
+|--------|-----------|
+| HP Kecil (355px - 394px) | 9px |
+| HP Besar (395px - 439px) | 10px |
+| Tablet/Desktop | Default (text-xs / 12px) |
+
+---
+
+## Pesanan Detail - Progress Bar
+
+| Device | Label | Circle Size |
+|--------|-------|------------|
+| HP Kecil (355px - 394px) | 7-8px, max-w 50px | 24x24 |
+| HP Besar (395px - 439px) | 8-9px, max-w 55px | 24x24 |
+| Tablet/Desktop | Short label / Full label | 28x28 |
 
 ---
 

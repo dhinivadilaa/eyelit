@@ -187,16 +187,15 @@ export default function PesananDetail() {
 
                         {/* Progress Bar Status */}
                         {statusPesanan !== 'Dibatalkan' && (
-                            <div className="mt-6 overflow-x-auto">
-                                <div className="flex items-center min-w-[500px]">
+                            <div className="mt-6 overflow-x-auto pb-1">
+                                <div className="flex items-center progress-bar-wrap">
                                     {STATUS_STEPS.map((step, i) => {
                                         const isCompleted = i < currentStep;
                                         const isCurrent = i === currentStep;
-                                        const isPending = i > currentStep;
                                         return (
-                                            <div key={step.label} className="flex items-center flex-1 last:flex-none">
-                                                <div className="flex flex-col items-center">
-                                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors ${
+                                            <div key={step.label} className="flex items-center flex-1 min-w-0 last:flex-none">
+                                                <div className="flex flex-col items-center px-0.5">
+                                                    <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold border-2 transition-colors ${
                                                         isCompleted
                                                             ? 'bg-[#2264c0] border-[#2264c0] text-white'
                                                             : isCurrent
@@ -205,15 +204,16 @@ export default function PesananDetail() {
                                                     }`}>
                                                         {isCompleted ? '✓' : i + 1}
                                                     </div>
-                                                    <p className={`text-[10px] mt-1 text-center max-w-[70px] leading-tight ${
+                                                    <p className={`text-[8px] sm:text-[10px] mt-1 text-center max-w-[60px] sm:max-w-[70px] leading-tight ${
                                                         isCompleted || isCurrent ? 'text-[#2264c0] font-medium' : 'text-gray-400'
                                                     }`}>
-                                                        <span className="hidden sm:inline">{step.label}</span>
+                                                        <span className="hidden lg:inline">{step.label}</span>
+                                                        <span className="hidden sm:inline lg:hidden">{step.short}</span>
                                                         <span className="sm:hidden">{step.short}</span>
                                                     </p>
                                                 </div>
                                                 {i < STATUS_STEPS.length - 1 && (
-                                                    <div className={`flex-1 h-0.5 mx-1 mb-5 ${isCompleted ? 'bg-[#2264c0]' : 'bg-gray-200'}`} />
+                                                    <div className={`h-0.5 mx-0.5 mb-4 sm:mb-5 flex-1 min-w-[4px] ${isCompleted ? 'bg-[#2264c0]' : 'bg-gray-200'}`} />
                                                 )}
                                             </div>
                                         );

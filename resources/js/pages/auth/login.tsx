@@ -84,8 +84,8 @@ export default function Login({
         <>
             <Head title="Masuk" />
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-                <div className="grid gap-6">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div className="grid gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
@@ -113,7 +113,7 @@ export default function Login({
                             }}
                         />
                         {localErrors.email && (
-                            <p className="text-sm text-red-600">{localErrors.email}</p>
+                            <p className="text-xs text-red-600">{localErrors.email}</p>
                         )}
                     </div>
 
@@ -168,7 +168,7 @@ export default function Login({
                             </button>
                         </div>
                         {localErrors.password && (
-                            <p className="text-sm text-red-600">{localErrors.password}</p>
+                            <p className="text-xs text-red-600">{localErrors.password}</p>
                         )}
                     </div>
 

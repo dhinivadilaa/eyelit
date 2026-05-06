@@ -387,7 +387,7 @@ export default function Katalog() {
                         />
 
                         {/* Filter Panel */}
-                        <div className={`fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-xl overflow-y-auto ${showFilter && !filterClosing ? 'filter-panel-enter' : ''} ${filterClosing ? 'filter-panel-exit' : ''}`}>
+                        <div className={`fixed top-0 right-0 h-full w-80 filter-panel-width bg-white z-50 shadow-xl overflow-y-auto ${showFilter && !filterClosing ? 'filter-panel-enter' : ''} ${filterClosing ? 'filter-panel-exit' : ''}`}>
                             {/* Header */}
                             <div className="flex items-center justify-between p-4 border-b border-[#19140035]">
                                 <h3 className="text-base sm:text-lg font-semibold text-[#1b1b18]">Filter</h3>

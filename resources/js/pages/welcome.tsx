@@ -461,22 +461,24 @@ export default function Welcome() {
                 </section>
 
                 {/* CTA Section */}
-                <section className="bg-[#2264c0] py-8 sm:py-16 overflow-hidden relative group cursor-pointer">
-                    <div className="mx-auto max-w-7xl px-4 flex items-center justify-between gap-8 relative z-10">
-                        <div>
-                            <h2 className="text-lg sm:text-xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">Cari Lebih Banyak Gayamu</h2>
-                            <p className="text-white/80 text-xs sm:text-sm">Temukan kacamata yang sempurna untuk gaya hidupmu.</p>
+                <Link href="/katalog" className="block">
+                    <section className="bg-[#2264c0] py-8 sm:py-16 overflow-hidden relative group cursor-pointer">
+                        <div className="mx-auto max-w-7xl px-4 flex items-center justify-between gap-8 relative z-10">
+                            <div>
+                                <h2 className="text-lg sm:text-xl lg:text-3xl font-bold text-white mb-1 sm:mb-2">Cari Lebih Banyak Gayamu</h2>
+                                <p className="text-white/80 text-xs sm:text-sm">Temukan kacamata yang sempurna untuk gaya hidupmu.</p>
+                            </div>
                         </div>
-                    </div>
-                    {/* White Block - slides to left 100% on hover */}
-                    <div className="absolute top-0 right-0 w-0 h-full bg-white overflow-hidden group-hover:w-full transition-all duration-500 ease-out flex items-center justify-center z-20">
-                        <div className="text-center">
-                            <span className="cta-text block text-xl sm:text-2xl lg:text-5xl font-black text-[#2264c0]">
-                                Koleksi Terlengkap<br/>untuk Gaya Hidupmu
-                            </span>
+                        {/* White Block - slides to left 100% on hover */}
+                        <div className="absolute top-0 right-0 w-0 h-full bg-white overflow-hidden group-hover:w-full transition-all duration-500 ease-out flex items-center justify-center z-20">
+                            <div className="text-center">
+                                <span className="cta-text block text-xl sm:text-2xl lg:text-5xl font-black text-[#2264c0]">
+                                    Koleksi Terlengkap<br/>untuk Gaya Hidupmu
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                </Link>
 
                 {/* Footer */}
                 <footer className="bg-[#1b1b18] text-white">

@@ -8,11 +8,14 @@
 @custom-variant dark (&:is(.dark *));
 
 /* Prevent horizontal scrolling - global rules */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     max-width: 100vw;
     overflow-x: hidden;
 }
@@ -490,15 +493,37 @@ html.dark {
 
 /* Grid Box Template */
 @keyframes slide-left {
-    0%, 41.66% { transform: translateX(0); }
-    50%, 91.66% { transform: translateX(-100%); }
-    100% { transform: translateX(0); }
+
+    0%,
+    41.66% {
+        transform: translateX(0);
+    }
+
+    50%,
+    91.66% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
 }
 
 @keyframes slide-left-row {
-    0%, 41.66% { transform: translateX(0); }
-    50%, 91.66% { transform: translateX(-100%); }
-    100% { transform: translateX(0); }
+
+    0%,
+    41.66% {
+        transform: translateX(0);
+    }
+
+    50%,
+    91.66% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
 }
 
 .animate-row {
@@ -607,14 +632,14 @@ html.dark {
     color: #1b1b18;
 }
 
-/* HP Kecil (355px - 395px) - teks lebih compact */
+/* HP Kecil (355px - 395px) */
 @media (min-width: 355px) and (max-width: 394px) {
     .grid-box-merek {
         font-size: 11px;
     }
 
     .grid-box-harga {
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .grid-box-tipe {
@@ -622,18 +647,18 @@ html.dark {
     }
 }
 
-/* HP Besar (395px - 439px) - kembalikan ukuran normal */
+/* HP Besar (395px - 439px) */
 @media (min-width: 395px) and (max-width: 439px) {
     .grid-box-merek {
-        font-size: 14px;
+        font-size: 11px;
     }
 
     .grid-box-harga {
-        font-size: 16px;
+        font-size: 10px;
     }
 
     .grid-box-tipe {
-        font-size: 11px;
+        font-size: 8px;
     }
 }
 
@@ -644,11 +669,118 @@ html.dark {
     }
 
     .grid-box-harga {
-        font-size: 14px;
+        font-size: 11px;
     }
 
     .grid-box-tipe {
         display: none;
+    }
+}
+
+/* Keranjang Card - HP Kecil (355px - 394px) */
+@media (min-width: 355px) and (max-width: 394px) {
+    .keranjang-card {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .keranjang-card .text-\[10px\] {
+        font-size: 9px;
+    }
+
+    .keranjang-card .text-xs {
+        font-size: 10px;
+    }
+
+    .keranjang-card .text-xs + a,
+    .keranjang-card a.text-xs,
+    .keranjang-card .text-xs.font-semibold {
+        font-size: 11px;
+    }
+}
+
+/* Keranjang Card - HP Besar (395px - 439px) */
+@media (min-width: 395px) and (max-width: 439px) {
+    .keranjang-card {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .keranjang-card .text-\[10px\] {
+        font-size: 10px;
+    }
+
+    .keranjang-card .text-xs {
+        font-size: 11px;
+    }
+
+    .keranjang-card a.text-xs {
+        font-size: 12px;
+    }
+}
+
+/* Progress Bar - HP Kecil (355px - 394px) */
+@media (min-width: 355px) and (max-width: 394px) {
+    .progress-bar-wrap {
+        gap: 0;
+    }
+
+    .progress-bar-wrap .text-\[10px\] {
+        font-size: 8px;
+    }
+
+    .progress-bar-wrap .text-\[8px\] {
+        font-size: 7px;
+        max-width: 50px;
+    }
+}
+
+/* Progress Bar - HP Besar (395px - 439px) */
+@media (min-width: 395px) and (max-width: 439px) {
+    .progress-bar-wrap .text-\[10px\] {
+        font-size: 9px;
+    }
+
+    .progress-bar-wrap .text-\[8px\] {
+        font-size: 8px;
+        max-width: 55px;
+    }
+}
+
+/* Lens Card Info - HP Kecil (355px - 394px) */
+@media (min-width: 355px) and (max-width: 394px) {
+    .lens-card-info {
+        font-size: 9px;
+    }
+
+    .lens-card-info .text-xs {
+        font-size: 9px;
+    }
+
+    .lens-card-info p {
+        line-height: 1.3;
+    }
+}
+
+/* Lens Card Info - HP Besar (395px - 439px) */
+@media (min-width: 395px) and (max-width: 439px) {
+    .lens-card-info {
+        font-size: 10px;
+    }
+
+    .lens-card-info .text-xs {
+        font-size: 10px;
+    }
+
+    .lens-card-info p {
+        line-height: 1.3;
+    }
+}
+
+/* Filter Panel - Mobile Width */
+@media not all and (min-width: 439px) {
+    .filter-panel-width {
+        width: 65%;
     }
 }
 
@@ -769,72 +901,180 @@ html.dark {
 
 /* CTA Section Animations */
 @keyframes float-slow {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-30px) rotate(5deg); }
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-30px) rotate(5deg);
+    }
 }
 
 @keyframes float-medium {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(-5deg); }
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(-5deg);
+    }
 }
 
 @keyframes float-fast {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-15px) translateX(10px); }
+
+    0%,
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+
+    50% {
+        transform: translateY(-15px) translateX(10px);
+    }
 }
 
 @keyframes fade-in {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slide-up {
-    0% { opacity: 0; transform: translateY(30px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slide-up-delay {
-    0% { opacity: 0; transform: translateY(30px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slide-up-delay-2 {
-    0% { opacity: 0; transform: translateY(30px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
-.animate-float-medium { animation: float-medium 6s ease-in-out infinite; }
-.animate-float-fast { animation: float-fast 4s ease-in-out infinite; }
-.animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
-.animate-slide-up { animation: slide-up 0.8s ease-out 0.2s forwards; opacity: 0; }
-.animate-slide-up-delay { animation: slide-up 0.8s ease-out 0.4s forwards; opacity: 0; }
-.animate-slide-up-delay-2 { animation: slide-up 0.8s ease-out 0.6s forwards; opacity: 0; }
+.animate-float-slow {
+    animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-medium {
+    animation: float-medium 6s ease-in-out infinite;
+}
+
+.animate-float-fast {
+    animation: float-fast 4s ease-in-out infinite;
+}
+
+.animate-fade-in {
+    animation: fade-in 0.8s ease-out forwards;
+}
+
+.animate-slide-up {
+    animation: slide-up 0.8s ease-out 0.2s forwards;
+    opacity: 0;
+}
+
+.animate-slide-up-delay {
+    animation: slide-up 0.8s ease-out 0.4s forwards;
+    opacity: 0;
+}
+
+.animate-slide-up-delay-2 {
+    animation: slide-up 0.8s ease-out 0.6s forwards;
+    opacity: 0;
+}
 
 /* CTA Section Animations */
 @keyframes bounce-slow {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-15px) scale(1.05); }
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-15px) scale(1.05);
+    }
 }
 
 @keyframes bounce-medium {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-10px) scale(1.05); }
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-10px) scale(1.05);
+    }
 }
 
 @keyframes bounce-fast {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-8px) scale(1.05); }
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-8px) scale(1.05);
+    }
 }
 
-.animate-bounce-slow { animation: bounce-slow 2s ease-in-out infinite; }
-.animate-bounce-medium { animation: bounce-medium 1.5s ease-in-out infinite; }
-.animate-bounce-fast { animation: bounce-fast 1s ease-in-out infinite; }
+.animate-bounce-slow {
+    animation: bounce-slow 2s ease-in-out infinite;
+}
+
+.animate-bounce-medium {
+    animation: bounce-medium 1.5s ease-in-out infinite;
+}
+
+.animate-bounce-fast {
+    animation: bounce-fast 1s ease-in-out infinite;
+}
 
 /* CTA Moving Arrow */
 @keyframes move-arrow-left {
-    0% { right: -80px; opacity: 1; }
-    100% { right: 50%; opacity: 1; }
+    0% {
+        right: -80px;
+        opacity: 1;
+    }
+
+    100% {
+        right: 50%;
+        opacity: 1;
+    }
 }
 
 .cta-arrow {
@@ -860,44 +1100,92 @@ html.dark {
 
 /* Carousel Slide Animations */
 @keyframes carousel-image-fade-out {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }
 
 @keyframes carousel-image-fade-in {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 @keyframes carousel-text-fade-out {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }
 
 @keyframes carousel-text-fade-in {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 @keyframes carousel-dot-scale {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.4); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.4);
+    }
 }
 
 @keyframes carousel-button-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 100, 192, 0.4); }
-    50% { box-shadow: 0 0 0 8px rgba(34, 100, 192, 0); }
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(34, 100, 192, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(34, 100, 192, 0);
+    }
 }
 
-.carousel-image-out { animation: carousel-image-fade-out 0.4s ease-out forwards; }
-.carousel-image-in { animation: carousel-image-fade-in 0.4s ease-in forwards; }
+.carousel-image-out {
+    animation: carousel-image-fade-out 0.4s ease-out forwards;
+}
 
-.carousel-text-out { animation: carousel-text-fade-out 0.25s ease-out forwards; }
-.carousel-text-in { animation: carousel-text-fade-in 0.25s ease-in forwards; }
+.carousel-image-in {
+    animation: carousel-image-fade-in 0.4s ease-in forwards;
+}
 
-.carousel-dot-active { animation: carousel-dot-scale 0.3s ease-out forwards; }
+.carousel-text-out {
+    animation: carousel-text-fade-out 0.25s ease-out forwards;
+}
 
-.carousel-button-click { animation: carousel-button-pulse 0.6s ease-out; }
+.carousel-text-in {
+    animation: carousel-text-fade-in 0.25s ease-in forwards;
+}
+
+.carousel-dot-active {
+    animation: carousel-dot-scale 0.3s ease-out forwards;
+}
+
+.carousel-button-click {
+    animation: carousel-button-pulse 0.6s ease-out;
+}
 
 /* Filter Panel Slide Animations */
 @keyframes filter-slide-in {
@@ -905,6 +1193,7 @@ html.dark {
         transform: translateX(100%);
         opacity: 0;
     }
+
     100% {
         transform: translateX(0);
         opacity: 1;
@@ -916,6 +1205,7 @@ html.dark {
         transform: translateX(0);
         opacity: 1;
     }
+
     100% {
         transform: translateX(100%);
         opacity: 0;
@@ -926,6 +1216,7 @@ html.dark {
     0% {
         opacity: 0;
     }
+
     100% {
         opacity: 1;
     }
@@ -935,6 +1226,7 @@ html.dark {
     0% {
         opacity: 1;
     }
+
     100% {
         opacity: 0;
     }
@@ -954,6 +1246,39 @@ html.dark {
 
 .backdrop-exit {
     animation: backdrop-fade-out 0.3s ease-out forwards;
+}
+
+/* Status Change Animation - Pesanan Page */
+@keyframes status-slide-in {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+    }
+    50% {
+        opacity: 0.6;
+        transform: translateY(4px) scale(0.99);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes tab-flash-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(34, 100, 192, 0);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(34, 100, 192, 0.15);
+    }
+}
+
+.animate-status-change {
+    animation: status-slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-tab-pulse {
+    animation: tab-flash-pulse 0.8s ease-in-out forwards;
 }
 
 /* Custom Toast Notifications */

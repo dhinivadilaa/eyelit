@@ -164,7 +164,7 @@ export default function Register() {
     return (
         <>
             <Head title="Daftar" />
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div className="grid gap-6">
                     <div className="grid gap-2">
                         <Label htmlFor="username">Nama Pengguna</Label>
@@ -188,7 +188,7 @@ export default function Register() {
                             }}
                         />
                         {localErrors.username && (
-                            <p className="text-sm text-red-600">{localErrors.username}</p>
+                            <p className="text-xs text-red-600">{localErrors.username}</p>
                         )}
                     </div>
 
@@ -213,7 +213,7 @@ export default function Register() {
                             }}
                         />
                         {localErrors.email && (
-                            <p className="text-sm text-red-600">{localErrors.email}</p>
+                            <p className="text-xs text-red-600">{localErrors.email}</p>
                         )}
                     </div>
 
@@ -243,7 +243,7 @@ export default function Register() {
                             }}
                         />
                         {localErrors.no_hp && (
-                            <p className="text-sm text-red-600">{localErrors.no_hp}</p>
+                            <p className="text-xs text-red-600">{localErrors.no_hp}</p>
                         )}
                     </div>
 
@@ -287,7 +287,7 @@ export default function Register() {
                             </button>
                         </div>
                         {localErrors.password && (
-                            <p className="text-sm text-red-600">{localErrors.password}</p>
+                            <p className="text-xs text-red-600">{localErrors.password}</p>
                         )}
                     </div>
 
@@ -333,7 +333,7 @@ export default function Register() {
                             </button>
                         </div>
                         {localErrors.password_confirmation && (
-                            <p className="text-sm text-red-600">{localErrors.password_confirmation}</p>
+                            <p className="text-xs text-red-600">{localErrors.password_confirmation}</p>
                         )}
                     </div>
 

@@ -7,9 +7,9 @@ export default function AuthSplitLayout({
 }: AuthLayoutProps) {
 
     return (
-        <div className="relative grid min-h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
+        <div className="relative grid min-h-dvh flex-col items-center justify-center px-8 sm:px-0 xl:max-w-none xl:grid-cols-2 xl:px-0">
             {/* Kolom Kiri - Background Image */}
-            <div className="relative hidden h-full flex-col p-10 lg:flex">
+            <div className="relative hidden h-full flex-col p-10 xl:flex">
                 <div className="absolute inset-0">
                     <img
                         src="/images/auth/login-background.png"
@@ -34,9 +34,9 @@ export default function AuthSplitLayout({
             </div>
 
             {/* Kolom Kanan - Form */}
-            <div className="w-full lg:p-8">
+            <div className="w-full xl:p-8">
                 <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
-                    <a href="/" className="max-lg:block hidden z-20 mx-auto size-14">
+                    <a href="/" className="max-xl:block hidden z-20 mx-auto size-14">
                     <img
                         src="/images/logo/AuthMobile.svg"
                         alt="EyeLit Logo"

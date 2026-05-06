@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, ChevronDown, LogOut, Package, Settings, ShoppingBag, ShoppingCart, User } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const safe = (v: any) => (v ?? "").toString().trim();
 
@@ -51,9 +51,25 @@ export default function Pesanan() {
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
     const [showTabDropdown, setShowTabDropdown] = useState(false);
     const [activeTab, setActiveTab] = useState('Semua');
+    const [statusChangeKey, setStatusChangeKey] = useState(0);
+    const prevStatusRef = useRef<string | null>(null);
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifications: any[] = auth.user?.notifications || [];
+
+    // Detect status changes and trigger animation
+    useEffect(() => {
+        if (prevStatusRef.current === null) {
+            prevStatusRef.current = JSON.stringify(items.map(p => p.status_pesanan));
+            return;
+        }
+
+        const currentStatus = JSON.stringify(items.map(p => p.status_pesanan));
+        if (prevStatusRef.current !== currentStatus) {
+            prevStatusRef.current = currentStatus;
+            setStatusChangeKey(k => k + 1);
+        }
+    }, [items]);
 
     const filtered = activeTab === 'Semua'
         ? items
@@ -166,7 +182,7 @@ export default function Pesanan() {
                     <h1 className="text-2xl font-bold text-[#1b1b18] mb-6">Pesanan Saya</h1>
 
                     {/* Tabs - Desktop */}
-                    <div className="hidden sm:flex gap-1 overflow-x-auto mb-6 bg-white rounded-xl border border-[#19140035] p-1">
+                    <div key={`tabs-${statusChangeKey}`} className="hidden sm:flex gap-1 overflow-x-auto mb-6 bg-white rounded-xl border border-[#19140035] p-1 animate-tab-pulse">
                         {STATUS_TABS.map((tab) => (
                             <button
                                 key={tab.label}
@@ -237,7 +253,7 @@ export default function Pesanan() {
                             </Link>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-3 sm:gap-4">
+                        <div key={statusChangeKey} className="flex flex-col gap-3 sm:gap-4 animate-status-change">
                             {items.map((p: any) => {
                                 const firstItem = p.detail_pesanan?.[0];
                                 const extraCount = (p.detail_pesanan?.length ?? 0) - 1;

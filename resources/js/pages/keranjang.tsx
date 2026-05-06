@@ -219,59 +219,60 @@ export default function Keranjang() {
                                     return (
                                         <div
                                             key={item.id}
-                                            className={`bg-white rounded-xl border-2 p-4 flex gap-4 transition-all ${
+                                            className={`bg-white rounded-xl border-2 p-3 sm:p-4 flex flex-col sm:flex-row gap-3 sm:gap-4 transition-all keranjang-card ${
                                                 isSelected
                                                     ? 'border-[#2264c0] shadow-md'
                                                     : 'border-[#19140035]'
                                             }`}
                                         >
                                             {/* Checkbox */}
-                                            <div className="flex items-start pt-1">
+                                            <div className="flex items-start pt-0.5 sm:pt-1 flex-shrink-0">
                                                 <div
                                                     onClick={() => toggleItem(item.id)}
-                                                    className={`w-6 h-6 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all ${
+                                                    className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all ${
                                                         isSelected
                                                             ? 'bg-[#2264c0] border-[#2264c0]'
                                                             : 'border-[#19140035] hover:border-[#2264c0]'
                                                     }`}
                                                 >
                                                     {isSelected && (
-                                                        <Check className="size-4 text-white" />
+                                                        <Check className="size-3 sm:size-4 text-white" />
                                                     )}
                                                 </div>
                                             </div>
 
-                                            <Link href={`/produk/${item.produk_id}`} className="flex-shrink-0">
+                                            <Link href={`/produk/${item.produk_id}`} className="flex-shrink-0 self-start">
                                                 <img
                                                     src={`/images/produk/${item.gambar}`}
                                                     alt={item.nama_produk}
-                                                    className="w-24 h-24 object-contain rounded-lg bg-gray-50"
+                                                    className="w-16 h-16 sm:w-24 sm:h-24 object-contain rounded-lg bg-gray-50"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
                                                 />
                                             </Link>
 
-                                            <div className="flex-1 flex flex-col gap-2">
+                                            <div className="flex-1 flex flex-col gap-2 min-w-0">
                                                 <div className="flex items-start justify-between gap-2">
-                                                    <div>
-                                                        <p className="text-xs text-[#2264c0] font-medium">{item.merek}</p>
-                                                        <Link href={`/produk/${item.produk_id}`} className="text-sm font-semibold text-[#1b1b18] hover:text-[#2264c0] transition-colors">
+                                                    <div className="min-w-0">
+                                                        <p className="text-[10px] sm:text-xs text-[#2264c0] font-medium">{item.merek}</p>
+                                                        <Link href={`/produk/${item.produk_id}`} className="text-xs sm:text-sm font-semibold text-[#1b1b18] hover:text-[#2264c0] transition-colors block truncate">
                                                             {item.nama_produk}
                                                         </Link>
-                                                        <p className="text-xs text-[#5f6368] mt-0.5">{item.tipe_pembelian}</p>
+                                                        <p className="text-[10px] sm:text-xs text-[#5f6368] mt-0.5">{item.tipe_pembelian}</p>
                                                     </div>
                                                     <button
                                                         onClick={() => hapusItem(item.id)}
-                                                        className="p-1.5 rounded-full hover:bg-red-50 text-[#5f6368] hover:text-red-500 transition-colors flex-shrink-0"
+                                                        className="p-1 rounded-full hover:bg-red-50 text-[#5f6368] hover:text-red-500 transition-colors flex-shrink-0"
                                                     >
-                                                        <Trash2 className="size-4" />
+                                                        <Trash2 className="size-3 sm:size-4" />
                                                     </button>
                                                 </div>
 
                                                 {item.tipe_pembelian === 'Frame + Lensa' && (
-                                                    <div className="bg-blue-50 rounded-lg px-3 py-2.5 space-y-1.5">
+                                                    <div className="bg-blue-50 rounded-lg px-3 py-2.5 space-y-1.5 lens-card-info">
                                                         <div className="flex items-center gap-3">
                                                             <div className="flex-1">
-                                                                <p className="text-xs font-semibold text-[#2264c0] mb-0.5">Mata Kanan (OD)</p>
+                                                                <p className="text-xs font-semibold text-[#2264c0] mb-0.5">Mata Kanan</p>
+                                                                <p className="text-[10px] sm:text-xs text-[#5f6368] mb-1">(OD)</p>
                                                                 <div className="text-xs text-[#1b1b18] space-y-0.5">
                                                                     <p className="font-medium">
                                                                         {item.jenis_lensa_od ? `${item.jenis_lensa_od} ${item.nilai_lensa_od}` : '-'}
@@ -280,7 +281,8 @@ export default function Keranjang() {
                                                                 </div>
                                                             </div>
                                                             <div className="flex-1">
-                                                                <p className="text-xs font-semibold text-[#2264c0] mb-0.5">Mata Kiri (OS)</p>
+                                                                <p className="text-xs font-semibold text-[#2264c0] mb-0.5">Mata Kiri</p>
+                                                                <p className="text-[10px] sm:text-xs text-[#5f6368] mb-1">(OS)</p>
                                                                 <div className="text-xs text-[#1b1b18] space-y-0.5">
                                                                     <p className="font-medium">
                                                                         {item.jenis_lensa_os ? `${item.jenis_lensa_os} ${item.nilai_lensa_os}` : '-'}
@@ -305,20 +307,20 @@ export default function Keranjang() {
                                                         <button
                                                             onClick={() => updateJumlah(item.id, item.jumlah - 1)}
                                                             disabled={item.jumlah <= 1}
-                                                            className="w-7 h-7 rounded-full border border-[#19140035] flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-[#19140035] flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                                         >
-                                                            <Minus className="size-3" />
+                                                            <Minus className="size-2.5 sm:size-3" />
                                                         </button>
-                                                        <span className="w-8 text-center text-sm font-semibold">{item.jumlah}</span>
+                                                        <span className="w-6 sm:w-8 text-center text-xs sm:text-sm font-semibold">{item.jumlah}</span>
                                                         <button
                                                             onClick={() => updateJumlah(item.id, item.jumlah + 1)}
                                                             disabled={item.jumlah >= item.stok}
-                                                            className="w-7 h-7 rounded-full border border-[#19140035] flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-[#19140035] flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                                         >
-                                                            <Plus className="size-3" />
+                                                            <Plus className="size-2.5 sm:size-3" />
                                                         </button>
                                                     </div>
-                                                    <p className={`text-sm font-bold ${isSelected ? 'text-[#2264c0]' : 'text-[#5f6368]'}`}>
+                                                    <p className={`text-xs sm:text-sm font-bold ${isSelected ? 'text-[#2264c0]' : 'text-[#5f6368]'}`}>
                                                         Rp {item.subtotal.toLocaleString('id-ID')}
                                                     </p>
                                                 </div>
