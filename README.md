@@ -159,6 +159,90 @@ Reusable UI components built on Radix UI:
 - `Avatar`, `Badge`, `Card`, `Separator`
 - `Tooltip`, `Sonner` (toast notifications)
 
-## License
+## 🚀 Deployment ke Render
 
-MIT
+### Persiapan
+
+1. **Push ke GitHub**
+   ```bash
+   git add .
+   git commit -m "Ready for production deployment"
+   git push origin main
+   ```
+
+2. **Daftar akun Render** di [render.com](https://render.com)
+
+### Setup di Render Dashboard
+
+#### 1. Web Service
+- **Name**: `eyelit-laravel`
+- **Runtime**: `Docker`
+- **Region**: Singapore (recommended untuk Indonesia)
+- **Branch**: `main`
+
+#### 2. Environment Variables
+```env
+APP_NAME=EyeLit
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-app-name.onrender.com
+APP_KEY=base64_generated_key
+
+# Database (PostgreSQL)
+DB_CONNECTION=pgsql
+DB_HOST=your_db_host
+DB_PORT=5432
+DB_DATABASE=your_db_name
+DB_USERNAME=your_db_user
+DB_PASSWORD=your_db_password
+
+# API Keys
+XENDIT_SECRET_KEY=your_xendit_secret_key
+RAJAONGKIR_API_KEY=your_rajaongkir_api_key
+
+# Session & Cache
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+```
+
+#### 3. Database
+- **Type**: PostgreSQL
+- **Name**: `eyelit-db`
+
+### Setup Production
+
+Setelah deploy, jalankan commands berikut via Render shell:
+
+```bash
+php artisan migrate --force
+php artisan db:seed --force
+php artisan config:cache
+php artisan storage:link
+```
+
+### Konfigurasi API
+
+#### Xendit Setup
+1. Login ke [Xendit Dashboard](https://dashboard.xendit.co)
+2. Dapatkan Secret Key dari Settings → API Keys
+3. Set di environment variables
+
+#### RajaOngkir Setup
+1. Login ke [RajaOngkir](https://rajaongkir.com)
+2. Dapatkan API Key dari dashboard
+3. Set di environment variables
+
+### Custom Domain (Opsional)
+
+1. Beli domain di Niagahoster/Rumahweb
+2. Di Render → Settings → Custom Domain
+3. Update DNS records sesuai instruksi Render
+
+### Monitoring
+
+- **Logs**: Render Dashboard → Logs
+- **Database**: pgAdmin atau tools PostgreSQL lainnya
+- **Performance**: Render menyediakan metrics otomatis
+
+## License

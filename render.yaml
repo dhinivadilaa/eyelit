@@ -1,0 +1,65 @@
+services:
+  - type: web
+    name: eyelit-laravel
+    runtime: php
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      npm ci
+      npm run build
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_NAME
+        value: EyeLit
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        generateValue: true
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: eyelit-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: eyelit-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: eyelit-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: eyelit-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: eyelit-db
+          property: password
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: MAIL_MAILER
+        value: log
+      - key: XENDIT_SECRET_KEY
+        sync: false
+      - key: RAJAONGKIR_API_KEY
+        sync: false
+
+  - type: pgsql
+    name: eyelit-db
+    ipAllowList: []
