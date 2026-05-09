@@ -22,6 +22,7 @@ interface Alamat {
     id: number;
     nama_penerima: string;
     no_hp_penerima: string;
+    kode_kota?: string | null; // ← TAMBAHKAN FIELD INI
     kota_kabupaten: string;
     kecamatan: string;
     kode_pos: string;
@@ -50,14 +51,14 @@ interface Ekspedisi {
 }
 
 export default function Checkout() {
-    const { auth, items, total, alamat, provinsi, ekspedisi } = usePage().props as any;
+    const pageProps = usePage().props as any;
+    const { auth, items, total, alamat, ekspedisi } = pageProps;
     const keranjangCount: number = auth.keranjang_count || 0;
 
     // 🔥 guard array props agar tidak crash saat undefined
     const alamatList: Alamat[]       = Array.isArray(alamat)    ? alamat    : [];
     const ekspedisiList: Ekspedisi[] = Array.isArray(ekspedisi) ? ekspedisi : [];
     const itemList: Item[]           = Array.isArray(items)     ? items     : [];
-    const provinsiList: Provinsi[]   = Array.isArray(provinsi)  ? provinsi  : [];
     const totalHarga: number         = Number(total ?? 0);
 
     const [showUserDropdown, setShowUserDropdown]   = useState(false);
@@ -67,6 +68,10 @@ export default function Checkout() {
     const userDropdownTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifications: any[] = auth.user?.notifications || [];
+
+    // Provinsi states - sekarang fetch dari API RajaOngkir
+    const [provinsiList, setProvinsiList] = useState<Provinsi[]>([]);
+    const [loadingProvinsi, setLoadingProvinsi] = useState<boolean>(true);
 
     // guard find/[0] dengan fallback null
     const [selectedAlamat, setSelectedAlamat] = useState<Alamat | null>(
@@ -82,6 +87,75 @@ export default function Checkout() {
     const [loadingKota, setLoadingKota] = useState<boolean>(false);
     const [selectedKota, setSelectedKota] = useState<Kota | null>(null);
     const [kotaError, setKotaError]     = useState<string | null>(null);
+
+    // Kota states untuk form tambah alamat
+    const [alamatKotaList, setAlamatKotaList] = useState<Kota[]>([]);
+    const [loadingAlamatKota, setLoadingAlamatKota] = useState<boolean>(false);
+
+    // Fetch provinsi dari API RajaOngkir saat komponen mount
+    useEffect(() => {
+        const fetchProvinsi = async () => {
+            try {
+                setLoadingProvinsi(true);
+                const response = await fetch('/api/provinsi');
+                if (!response.ok) throw new Error('Gagal memuat daftar provinsi');
+                const raw: any[] = await response.json();
+                console.log('Provinsi API returned:', raw);
+
+                const mapped: Provinsi[] = raw.map((item: any) => ({
+                    id: item.id,
+                    nama_provinsi: item.nama_provinsi ?? item.province ?? '',
+                }));
+
+                setProvinsiList(mapped);
+            } catch (error) {
+                console.error('Error fetching provinsi:', error);
+                // Fallback ke hardcoded provinsi jika API gagal
+                setProvinsiList([
+                    { id: 1, nama_provinsi: 'Aceh' },
+                    { id: 2, nama_provinsi: 'Sumatera Utara' },
+                    { id: 3, nama_provinsi: 'Sumatera Barat' },
+                    { id: 4, nama_provinsi: 'Riau' },
+                    { id: 5, nama_provinsi: 'Jambi' },
+                    { id: 6, nama_provinsi: 'Sumatera Selatan' },
+                    { id: 7, nama_provinsi: 'Bengkulu' },
+                    { id: 8, nama_provinsi: 'Lampung' },
+                    { id: 9, nama_provinsi: 'DKI Jakarta' },
+                    { id: 10, nama_provinsi: 'Jawa Barat' },
+                    { id: 11, nama_provinsi: 'Jawa Tengah' },
+                    { id: 12, nama_provinsi: 'DI Yogyakarta' },
+                    { id: 13, nama_provinsi: 'Jawa Timur' },
+                    { id: 14, nama_provinsi: 'Banten' },
+                    { id: 15, nama_provinsi: 'Bali' },
+                    { id: 16, nama_provinsi: 'Nusa Tenggara Barat' },
+                    { id: 17, nama_provinsi: 'Nusa Tenggara Timur' },
+                    { id: 18, nama_provinsi: 'Kalimantan Barat' },
+                    { id: 19, nama_provinsi: 'Kalimantan Tengah' },
+                    { id: 20, nama_provinsi: 'Kalimantan Selatan' },
+                    { id: 21, nama_provinsi: 'Kalimantan Timur' },
+                    { id: 22, nama_provinsi: 'Kalimantan Utara' },
+                    { id: 23, nama_provinsi: 'Sulawesi Utara' },
+                    { id: 24, nama_provinsi: 'Sulawesi Tengah' },
+                    { id: 25, nama_provinsi: 'Sulawesi Selatan' },
+                    { id: 26, nama_provinsi: 'Sulawesi Tenggara' },
+                    { id: 27, nama_provinsi: 'Gorontalo' },
+                    { id: 28, nama_provinsi: 'Sulawesi Barat' },
+                    { id: 29, nama_provinsi: 'Maluku' },
+                    { id: 30, nama_provinsi: 'Maluku Utara' },
+                    { id: 31, nama_provinsi: 'Papua Barat' },
+                    { id: 32, nama_provinsi: 'Papua' },
+                    { id: 33, nama_provinsi: 'Papua Tengah' },
+                    { id: 34, nama_provinsi: 'Papua Pegunungan' },
+                    { id: 35, nama_provinsi: 'Papua Selatan' },
+                    { id: 36, nama_provinsi: 'Papua Barat Daya' },
+                ]);
+            } finally {
+                setLoadingProvinsi(false);
+            }
+        };
+
+        fetchProvinsi();
+    }, []);
 
     // ✅ FIX UTAMA: mapping fleksibel agar cocok dengan semua kemungkinan field dari backend
     const fetchKota = async (provinsiId: string) => {
@@ -120,8 +194,54 @@ export default function Checkout() {
         }
     };
 
+    // Function untuk fetch kota di form tambah alamat
+    const fetchAlamatKota = async (provinsiId: string, provinsiNama: string = '') => {
+        console.log('fetchAlamatKota called with provinsiId:', provinsiId, 'provinsiNama:', provinsiNama);
+        if (!provinsiId) {
+            setAlamatKotaList([]);
+            alamatForm.setData('kode_kota', '');
+            alamatForm.setData('nama_kota', '');
+            alamatForm.setData('kota_kabupaten', '');
+            return;
+        }
+
+        setAlamatKotaList([]);
+        alamatForm.setData('kode_kota', '');
+        alamatForm.setData('nama_kota', '');
+        alamatForm.setData('kota_kabupaten', '');
+        setLoadingAlamatKota(true);
+        try {
+            const query = provinsiNama ? `?provinsi_name=${encodeURIComponent(provinsiNama)}` : '';
+            console.log('Fetching from API:', `/api/kota/${provinsiId}${query}`);
+            const response = await fetch(`/api/kota/${provinsiId}${query}`);
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                console.error('Response not ok:', response.status, response.statusText);
+                throw new Error('Gagal memuat daftar kota');
+            }
+            const raw: any[] = await response.json();
+            console.log('API returned data:', raw);
+
+            const mapped: Kota[] = raw.map((item: any) => ({
+                id:          item.id,
+                nama_kota:   item.nama_kota   ?? item.nama   ?? item.name ?? String(item.id),
+                kode_kota:   item.kode_kota   ?? item.kode   ?? String(item.id),
+                provinsi_id: item.provinsi_id ?? Number(provinsiId),
+            }));
+
+            console.log('Mapped kota data:', mapped);
+            setAlamatKotaList(mapped);
+        } catch (error) {
+            console.error('Error in fetchAlamatKota:', error);
+            setAlamatKotaList([]);
+        } finally {
+            setLoadingAlamatKota(false);
+        }
+    };
+
     const [ongkirMap, setOngkirMap]       = useState<Record<number, { harga: number; estimasi_hari_min: string; estimasi_hari_max: string }>>({});
     const [loadingOngkir, setLoadingOngkir] = useState(false);
+    const selectedKotaKode = selectedKota?.kode_kota || (selectedAlamat as any)?.kode_kota || '';
     const ongkirInfo = selectedEkspedisi ? (ongkirMap[selectedEkspedisi.id] ?? null) : null;
     const ongkir     = Number(ongkirInfo?.harga ?? 0);
     const estimasi   = ongkirInfo
@@ -130,36 +250,38 @@ export default function Checkout() {
     const grandTotal = totalHarga + ongkir;
 
     useEffect(() => {
-        if (!selectedAlamat) {
+        if (!selectedAlamat || !selectedKotaKode) {
             setOngkirMap({});
             return;
         }
         setLoadingOngkir(true);
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const csrfToken = pageProps.csrf || auth.csrf || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
         Promise.all(
             ekspedisiList.map((e) =>
                 fetch('/checkout/ongkir', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-  },
-  body: JSON.stringify({
-    kode_kota: selectedKota, // 🔥 ini penting
-  }),
-})
-                    
-                .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
-                .then(data => ({ id: e.id, data }))
-                .catch(() => ({ id: e.id, data: { harga: 0, estimasi_hari_min: '1', estimasi_hari_max: '3' } }))
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({
+                        alamat_id: selectedAlamat?.id,
+                        ekspedisi_id: e.id,
+                    }),
+                })
+                    .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
+                    .then(data => ({ id: e.id, data }))
+                    .catch(() => ({ id: e.id, data: { harga: 0, estimasi_hari_min: '1', estimasi_hari_max: '3' } }))
             )
         ).then(results => {
             const map: Record<number, { harga: number; estimasi_hari_min: string; estimasi_hari_max: string }> = {};
             results.forEach(({ id, data }) => { map[id] = data; });
             setOngkirMap(map);
         }).finally(() => setLoadingOngkir(false));
-    }, [selectedAlamat?.id]);
+    }, [selectedAlamat?.id, selectedKotaKode, ekspedisiList.length]);
 
     const alamatForm = useForm({
         nama_penerima: '',
@@ -184,8 +306,16 @@ export default function Checkout() {
         });
     }
 
+    const canSubmitCheckout = Boolean(
+        selectedAlamat &&
+        selectedEkspedisi &&
+        !loadingOngkir &&
+        ongkirInfo &&
+        ongkir > 0
+    );
+
     function submitCheckout() {
-        if (!selectedAlamat || !selectedEkspedisi) return;
+        if (!canSubmitCheckout || !selectedAlamat || !selectedEkspedisi) return;
         router.post('/checkout', {
             alamat_id:         selectedAlamat.id,
             ekspedisi_id:      selectedEkspedisi.id,
@@ -307,7 +437,12 @@ export default function Checkout() {
                                         <h2 className="text-sm font-semibold text-[#1b1b18]">Alamat Pengiriman</h2>
                                     </div>
                                     <button
-                                        onClick={() => setShowTambahAlamat(true)}
+                                        onClick={() => {
+                                            setShowTambahAlamat(true);
+                                            // Reset kota state untuk form tambah alamat
+                                            setAlamatKotaList([]);
+                                            setLoadingAlamatKota(false);
+                                        }}
                                         className="flex items-center gap-1 text-xs text-[#2264c0] hover:underline"
                                     >
                                         <Plus className="size-3" /> Tambah Alamat
@@ -380,10 +515,10 @@ export default function Checkout() {
                                                         ) : loadingOngkir ? (
                                                             <span className="text-[#9ca3af] text-xs">Menghitung...</span>
                                                         ) : info && info.harga > 0 ? (
-                                                            <>
+                                                            <div>
                                                                 <span className="font-semibold text-[#2264c0]">Rp {Number(info.harga).toLocaleString('id-ID')}</span>
-                                                                <span className="text-[#5f6368] text-xs ml-2">{safe(info.estimasi_hari_min)}–{safe(info.estimasi_hari_max)} hari</span>
-                                                            </>
+                                                                <span className="text-[#5f6368] text-xs block mt-1">Garansi tiba dalam {safe(info.estimasi_hari_min)}–{safe(info.estimasi_hari_max)} hari</span>
+                                                            </div>
                                                         ) : (
                                                             <span className="text-[#9ca3af] text-xs">Tidak tersedia</span>
                                                         )}
@@ -457,11 +592,14 @@ export default function Checkout() {
 
                                 <button
                                     onClick={submitCheckout}
-                                    disabled={!selectedAlamat || !selectedEkspedisi}
+                                    disabled={!canSubmitCheckout}
                                     className="mt-5 w-full py-3 bg-[#2264c0] text-white rounded-full font-semibold text-sm hover:bg-[#1a4f9a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Buat Pesanan
                                 </button>
+                                <p className="text-xs text-[#6b7280] mt-2">
+                                    Pastikan ongkir sudah terhitung terlebih dahulu. API Xendit akan dipanggil saat pesanan dibuat.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -509,11 +647,22 @@ export default function Checkout() {
                                 <select
                                     value={alamatForm.data.provinsi_id}
                                     onChange={(e) => {
-                                        alamatForm.setData('provinsi_id', e.target.value);
+                                        const selectedProvinsiId = e.target.value;
+                                        console.log('Provinsi selected:', selectedProvinsiId);
+                                        alamatForm.setData('provinsi_id', selectedProvinsiId);
                                         alamatForm.setData('kode_kota', '');
                                         alamatForm.setData('nama_kota', '');
+                                        alamatForm.setData('kota_kabupaten', '');
                                         setSelectedKota(null);
-                                        fetchKota(e.target.value);
+                                        const selectedProvinsiName = provinsiList.find((p) => String(p.id) === selectedProvinsiId)?.nama_provinsi || '';
+                                        if (selectedProvinsiId) {
+                                            console.log('Calling fetchAlamatKota with:', selectedProvinsiId, selectedProvinsiName);
+                                            fetchAlamatKota(selectedProvinsiId, selectedProvinsiName);
+                                        } else {
+                                            console.log('Provinsi cleared, clearing kota list');
+                                            setAlamatKotaList([]);
+                                            setLoadingAlamatKota(false);
+                                        }
                                     }}
                                     className="h-9 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0] bg-white"
                                 >
@@ -527,30 +676,29 @@ export default function Checkout() {
 
                             <div className="flex flex-col gap-1">
                                 <label className="text-xs font-medium text-[#5f6368]">Kota / Kabupaten</label>
-                                {loadingKota ? (
+                                {loadingAlamatKota ? (
                                     <div className="h-9 px-3 rounded-lg border border-[#19140035] text-sm flex items-center text-[#9ca3af]">Memuat kota...</div>
                                 ) : (
                                     <select
                                         value={alamatForm.data.kode_kota}
                                         onChange={(e) => {
                                             // 🔥 FIX: cari berdasarkan kode_kota (sudah di-mapping, pasti ada)
-                                            const kota = kotaList.find((k) => String(k.kode_kota) === e.target.value);
+                                            const kota = alamatKotaList.find((k) => String(k.kode_kota) === e.target.value);
                                             alamatForm.setData('kode_kota', e.target.value);
                                             alamatForm.setData('nama_kota', kota?.nama_kota || '');
                                             alamatForm.setData('kota_kabupaten', kota?.nama_kota || '');
                                             setSelectedKota(kota || null);
                                         }}
-                                        disabled={kotaList.length === 0}
+                                        disabled={alamatKotaList.length === 0}
                                         className="h-9 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0] bg-white disabled:bg-gray-50 disabled:text-[#9ca3af]"
                                     >
-                                        <option value="">{kotaList.length === 0 ? 'Pilih provinsi dulu' : 'Pilih Kota'}</option>
-                                        {kotaList.map((k) => (
+                                        <option value="">{alamatKotaList.length === 0 ? 'Pilih provinsi dulu' : 'Pilih Kota'}</option>
+                                        {alamatKotaList.map((k) => (
                                             // 🔥 FIX: pakai nama_kota & kode_kota hasil mapping — selalu ada
                                             <option key={k.id} value={k.kode_kota}>{safe(k.nama_kota)}</option>
                                         ))}
                                     </select>
                                 )}
-                                {kotaError && <p className="text-xs text-red-500">{kotaError}</p>}
                                 {alamatForm.errors.kode_kota && <p className="text-xs text-red-500">{alamatForm.errors.kode_kota}</p>}
                                 {alamatForm.errors.nama_kota && <p className="text-xs text-red-500">{alamatForm.errors.nama_kota}</p>}
                             </div>

@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User, X } from 'lucide-react';
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 
 export default function Katalog() {
     const { auth, produk } = usePage().props as any;
@@ -26,6 +26,25 @@ export default function Katalog() {
     const [displayMinHarga, setDisplayMinHarga] = useState<string>('');
     const [displayMaxHarga, setDisplayMaxHarga] = useState<string>('');
     const [hargaError, setHargaError] = useState<string>('');
+
+    // Carousel data - add new information slides here
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [imageAnimClass, setImageAnimClass] = useState('');
+    const [textAnimClass, setTextAnimClass] = useState('');
+    const [buttonAnimClass, setButtonAnimClass] = useState('');
+
+    const slides = [
+        {
+            image: '/images/carousel/informasi-1.png',
+            title: 'Gratis Pengiriman ke Seluruh Indonesia',
+            description: 'Nikmati bebas biaya pengiriman untuk setiap pemesanan. Kami mengirim ke lebih dari 100 kota di Indonesia dengan jaminan keamanan paket hingga tujuan.',
+        },
+        {
+            image: '/images/carousel/informasi-2.png',
+            title: 'Lensa Berkualitas Tinggi untuk Penglihatan Optimal',
+            description: 'Setiap kacamata EyeLit dilengkapi dengan lensa premium yang telah teruji ketajaman optiknya. Dirancang untuk kenyamanan seharian dengan coating anti-refleksi dan anti-gores.',
+        },
+    ];
 
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const cartDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -117,6 +136,58 @@ export default function Katalog() {
 
         return result;
     }, [produk, searchQuery, selectedMerek, selectedJenisKelamin, selectedWarna, selectedMaterial, selectedBentuk, minHarga, maxHarga, hasActiveFilters]);
+
+    const handlePrev = () => {
+        setImageAnimClass('carousel-image-out');
+        setTextAnimClass('carousel-text-out');
+        setButtonAnimClass('carousel-button-click');
+
+        setTimeout(() => {
+            setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+            setImageAnimClass('carousel-image-in');
+            setTextAnimClass('carousel-text-in');
+            setButtonAnimClass('');
+            setTimeout(() => {
+                setImageAnimClass('');
+                setTextAnimClass('');
+            }, 250);
+        }, 400);
+    };
+
+    const handleNext = () => {
+        setImageAnimClass('carousel-image-out');
+        setTextAnimClass('carousel-text-out');
+        setButtonAnimClass('carousel-button-click');
+
+        setTimeout(() => {
+            setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+            setImageAnimClass('carousel-image-in');
+            setTextAnimClass('carousel-text-in');
+            setButtonAnimClass('');
+            setTimeout(() => {
+                setImageAnimClass('');
+                setTextAnimClass('');
+            }, 250);
+        }, 400);
+    };
+
+    // Auto-play carousel every 6 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setImageAnimClass('carousel-image-out');
+            setTextAnimClass('carousel-text-out');
+            setTimeout(() => {
+                setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+                setImageAnimClass('carousel-image-in');
+                setTextAnimClass('carousel-text-in');
+                setTimeout(() => {
+                    setImageAnimClass('');
+                    setTextAnimClass('');
+                }, 250);
+            }, 400);
+        }, 6000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <>
@@ -339,6 +410,63 @@ export default function Katalog() {
                         </div>
                     </div>
                 </nav>
+
+                {/* Carousel Section */}
+                <section className="py-16 bg-white">
+                    <div className="container mx-auto px-4">
+                        <div className="flex flex-col lg:flex-row items-center gap-12">
+                            {/* Left: Image */}
+                            <div className="w-full lg:w-1/2">
+                                <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                                    <img
+                                        src={slides[currentSlide].image}
+                                        alt={slides[currentSlide].title}
+                                        className={`w-full h-auto transition-opacity duration-300 ${imageAnimClass}`}
+                                    />
+                                </div>
+                            </div>
+                            {/* Right: Text Content */}
+                            <div className="w-full lg:w-1/2 text-center lg:text-left">
+                                <h2 className={`text-3xl lg:text-4xl font-bold text-[#1b1b18] mb-4 leading-tight ${textAnimClass}`}>
+                                    {slides[currentSlide].title}
+                                </h2>
+                                <p className={`text-[#5f6368] text-base lg:text-lg leading-relaxed mb-8 ${textAnimClass}`}>
+                                    {slides[currentSlide].description}
+                                </p>
+                                <div className="flex items-center gap-4 justify-center lg:justify-start">
+                                    <button
+                                        onClick={handlePrev}
+                                        className="w-12 h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-white">
+                                            <path d="m15 18-6-6 6-6"/>
+                                        </svg>
+                                    </button>
+                                    <div className="flex gap-2">
+                                        {slides.map((_, index) => (
+                                            <span
+                                                key={index}
+                                                className={`w-3 h-3 rounded-full transition-colors ${
+                                                    index === currentSlide
+                                                        ? 'bg-[#2264c0] carousel-dot-active'
+                                                        : 'bg-[#2264c0]/30'
+                                                }`}
+                                            />
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={handleNext}
+                                        className="w-12 h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-white">
+                                            <path d="m9 18 6-6-6-6"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Search Section */}
                 <section className="bg-white border-b border-[#19140035]">
@@ -613,24 +741,34 @@ export default function Katalog() {
 
                 {/* Product Grid Section */}
                 <section>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
                         {filteredProduk?.map((item: any) => (
                             <Link key={item.id} href={`/produk/${item.id}`}>
-                                <div className="grid-box cursor-pointer hover:scale-[1.02] transition-transform duration-200">
-                                    <img
-                                        className="grid-box-image"
-                                       src={item.gambar ? `/images/produk/${encodeURIComponent(item.gambar)}` : '/images/placeholder.png'}
-                                        alt={item.nama_produk ?? 'Produk'}
-                                        onError={(e) => { (e.currentTarget.src = '/images/placeholder.png'); }}
-                                    />
+                                <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden cursor-pointer group">
+                                    {/* Product Image */}
+                                    <div className="aspect-square overflow-hidden bg-gray-50">
+                                        <img
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                            src={item.gambar ? `/images/produk/${encodeURIComponent(item.gambar)}` : '/images/placeholder.png'}
+                                            alt={item.nama_produk ?? 'Produk'}
+                                            onError={(e) => { (e.currentTarget.src = '/images/placeholder.png'); }}
+                                        />
+                                    </div>
+
+                                    {/* Product Info */}
                                     <div className="p-3">
-                                        <h3 className="text-sm font-semibold">
+                                        {/* Product Name */}
+                                        <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1 leading-tight">
                                             {item.nama_produk ?? 'Nama tidak tersedia'}
                                         </h3>
-                                        <p className="text-gray-500 text-xs">
+
+                                        {/* Brand */}
+                                        <p className="text-xs text-gray-500 mb-2">
                                             {item.merek ?? '-'}
                                         </p>
-                                        <p className="text-primary font-bold mt-1">
+
+                                        {/* Price */}
+                                        <p className="text-lg font-bold text-[#2264c0]">
                                             Rp {(Number(item.harga_produk ?? 0) || 0).toLocaleString('id-ID')}
                                         </p>
                                     </div>

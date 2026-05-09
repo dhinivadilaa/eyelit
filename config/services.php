@@ -36,5 +36,12 @@ return [
     ],
 'rajaongkir' => [
     'key' => env('RAJAONGKIR_API_KEY'),
+    'base_url' => env('RAJAONGKIR_API_BASE_URL', 'https://api.rajaongkir.com/starter'),
+    'origin_city_id' => env('RAJAONGKIR_ORIGIN_CITY_ID', 152),
+    ],
+
+    'xendit' => [
+        'key' => env('XENDIT_SECRET_KEY'),
+        'base_url' => env('XENDIT_BASE_URL', 'https://api.xendit.co'),
     ],
 ];

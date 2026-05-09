@@ -23,7 +23,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export default function PesananDetail() {
-    const { auth, pesanan, subtotal_produk, grand_total } = usePage().props as any;
+    const { auth, pesanan, subtotal_produk, grand_total, xendit_payment_url, xendit_payment_info } = usePage().props as any;
     const keranjangCount: number = auth.keranjang_count || 0;
 
     const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -151,6 +151,59 @@ export default function PesananDetail() {
                         <ArrowLeft className="size-4" />
                         Kembali ke Pesanan
                     </Link>
+
+                    {xendit_payment_url && (
+                        <div className="mb-6 rounded-xl border border-orange-200 bg-orange-50 p-4">
+                            <p className="text-sm font-semibold text-orange-900">Instruksi Pembayaran Xendit</p>
+                            <p className="text-sm text-orange-800">Silakan selesaikan pembayaran dengan detail di bawah ini.</p>
+                            <div className="mt-3 space-y-3 text-sm text-[#1b1b18]">
+                                <p>
+                                    <span className="font-semibold">Link pembayaran:</span>{' '}
+                                    <a href={xendit_payment_url} target="_blank" rel="noreferrer" className="text-[#2264c0] underline">
+                                        {xendit_payment_url}
+                                    </a>
+                                </p>
+                                {xendit_payment_info?.account_number && (
+                                    <p>
+                                        <span className="font-semibold">Nomor Virtual Account:</span>{' '}
+                                        {xendit_payment_info.account_number}
+                                    </p>
+                                )}
+                                {xendit_payment_info?.bank_code && (
+                                    <p>
+                                        <span className="font-semibold">Bank:</span>{' '}
+                                        {xendit_payment_info.bank_code}
+                                    </p>
+                                )}
+                                {/* QRIS Code Display */}
+                                {(xendit_payment_info?.qr_string || xendit_payment_info?.qr_code) && (
+                                    <div className="mt-4">
+                                        <p className="font-semibold mb-2">QRIS Code:</p>
+                                        <div className="bg-white p-3 rounded border">
+                                            {xendit_payment_info.qr_string ? (
+                                                <img
+                                                    src={`data:image/png;base64,${xendit_payment_info.qr_string}`}
+                                                    alt="QRIS Code"
+                                                    className="max-w-full h-auto mx-auto"
+                                                    style={{ maxWidth: '200px', maxHeight: '200px' }}
+                                                />
+                                            ) : xendit_payment_info.qr_code ? (
+                                                <img
+                                                    src={xendit_payment_info.qr_code}
+                                                    alt="QRIS Code"
+                                                    className="max-w-full h-auto mx-auto"
+                                                    style={{ maxWidth: '200px', maxHeight: '200px' }}
+                                                />
+                                            ) : null}
+                                        </div>
+                                        <p className="text-xs text-gray-600 mt-2 text-center">
+                                            Scan QR code ini dengan aplikasi e-wallet Anda (GoPay, OVO, Dana, dll.)
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Header Pesanan */}
                     <div className="bg-white rounded-xl border border-[#19140035] p-5 mb-5">

@@ -46,6 +46,8 @@ class PesananController extends Controller
             'pesanan'         => $pesanan,
             'subtotal_produk' => $subtotalProduk,
             'grand_total'     => $grandTotal,
+            'xendit_payment_url' => session('xendit_payment_url'),
+            'xendit_payment_info' => session('xendit_payment_info'),
         ]);
     }
 }

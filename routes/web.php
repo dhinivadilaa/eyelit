@@ -33,10 +33,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'proses'])->name('checkout.proses');
     Route::post('/checkout/alamat', [CheckoutController::class, 'tambahAlamat'])->name('checkout.alamat');
     Route::post('/checkout/ongkir', [OngkirController::class, 'hitung'])->name('checkout.ongkir');
+    Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan.index');
     Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
     Route::inertia('dashboard', 'dashboard')->name('dashboard')->middleware('admin');
 });
 Route::prefix('api')->group(function () {
+    Route::get('/provinsi', [OngkirController::class, 'getProvinsi']);
     Route::get('/kota/{provinsiId}', [OngkirController::class, 'getKota']);
+    Route::get('/kota', [OngkirController::class, 'getKota']);
 });
 require __DIR__.'/settings.php';
