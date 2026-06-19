@@ -4,6 +4,16 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
+import { execSync } from 'child_process';
+
+// Check if PHP is available on the environment path
+let hasPhp = false;
+try {
+    execSync('php -v', { stdio: 'ignore' });
+    hasPhp = true;
+} catch (e) {
+    hasPhp = false;
+}
 
 export default defineConfig({
     plugins: [
@@ -18,8 +28,8 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder({
+        hasPhp ? wayfinder({
             formVariants: true,
-        }),
-    ],
+        }) : null,
+    ].filter(Boolean),
 });
