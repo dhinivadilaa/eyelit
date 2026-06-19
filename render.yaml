@@ -2,6 +2,7 @@ services:
   - type: web
     name: eyelit-laravel
     runtime: php
+    plan: free
     buildCommand: |
       composer install --no-dev --optimize-autoloader
       npm ci
@@ -62,4 +63,5 @@ services:
 
   - type: pgsql
     name: eyelit-db
+    plan: free
     ipAllowList: []
