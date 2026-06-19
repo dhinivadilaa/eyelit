@@ -1,9 +1,10 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User, X } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Bell, BookOpen, LayoutGrid, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User, X, MessageCircle } from 'lucide-react';
 import { useRef, useState, useMemo, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export default function Katalog() {
-    const { auth, produk } = usePage().props as any;
+    const { auth, produk, lensa } = usePage().props as any;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -26,6 +27,23 @@ export default function Katalog() {
     const [displayMinHarga, setDisplayMinHarga] = useState<string>('');
     const [displayMaxHarga, setDisplayMaxHarga] = useState<string>('');
     const [hargaError, setHargaError] = useState<string>('');
+
+    // Purchase option modal states
+    const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+    const [selectedProduk, setSelectedProduk] = useState<any | null>(null);
+    const [purchaseAction, setPurchaseAction] = useState<'cart' | 'buy'>('cart');
+    const [purchaseType, setPurchaseType] = useState<'Frame Saja' | 'Frame + Lensa'>('Frame Saja');
+    const [lensOdType, setLensOdType] = useState('Minus');
+    const [lensOdValue, setLensOdValue] = useState(0.00);
+    const [lensOdCyl, setLensOdCyl] = useState(0.00);
+    const [lensOsType, setLensOsType] = useState('Minus');
+    const [lensOsValue, setLensOsValue] = useState(0.00);
+    const [lensOsCyl, setLensOsCyl] = useState(0.00);
+    const [antiRadiasi, setAntiRadiasi] = useState(false);
+    const [photochromic, setPhotochromic] = useState(false);
+
+    const lensValues = Array.from({ length: 41 }, (_, i) => i * 0.25); // 0.00 to 10.00
+    const cylinderValues = Array.from({ length: 17 }, (_, i) => i * 0.25); // 0.00 to 4.00
 
     // Carousel data - add new information slides here
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -50,8 +68,133 @@ export default function Katalog() {
     const cartDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const cartItems: any[] = auth.user?.cartItems || [];
+    const cartItems: any[] = auth.cart_items || [];
+    const keranjangCount: number = auth.keranjang_count || 0;
     const notifications: any[] = auth.user?.notifications || [];
+    const unreadNotificationsCount = notifications.filter((n: any) => !n.dibaca).length;
+
+    // Calculate lens price based on DB table records
+    const calculateLensPrice = (nilai: number, silinder: number, jenis: string) => {
+        let total = 0;
+        if (nilai > 0) {
+            const matchingLensa = lensa?.find((l: any) =>
+                l.jenis_lensa === jenis &&
+                nilai >= l.minus_plus_batas_bawah &&
+                nilai <= l.minus_plus_batas_atas
+            );
+            if (matchingLensa) {
+                total += Number(matchingLensa.harga_per_mata);
+            }
+        }
+        if (silinder > 0) {
+            const matchingSilinder = lensa?.find((l: any) =>
+                l.jenis_lensa === 'Silinder' &&
+                silinder >= l.minus_plus_batas_bawah &&
+                silinder <= l.minus_plus_batas_atas
+            );
+            if (matchingSilinder) {
+                total += Number(matchingSilinder.harga_per_mata);
+            }
+        }
+        return total;
+    };
+
+    const odPrice = useMemo(() => calculateLensPrice(lensOdValue, lensOdCyl, lensOdType), [lensOdValue, lensOdCyl, lensOdType, lensa]);
+    const osPrice = useMemo(() => calculateLensPrice(lensOsValue, lensOsCyl, lensOsType), [lensOsValue, lensOsCyl, lensOsType, lensa]);
+    
+    const hargaAntiRadiasi = antiRadiasi ? (lensa?.[0]?.harga_anti_radiasi ?? 150000) : 0;
+    const hargaPhotochromic = photochromic ? (lensa?.[0]?.harga_photochromic ?? 200000) : 0;
+
+    const calculateTotalPrice = () => {
+        let total = Number(selectedProduk?.harga_produk ?? 0);
+        if (purchaseType === 'Frame + Lensa') {
+            total += odPrice;
+            total += osPrice;
+            total += Number(hargaAntiRadiasi);
+            total += Number(hargaPhotochromic);
+        }
+        return total;
+    };
+
+    const handleAddToCart = (e: React.MouseEvent, item: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!auth.user) {
+            router.visit('/login');
+            return;
+        }
+        setSelectedProduk(item);
+        setPurchaseAction('cart');
+        setPurchaseType('Frame Saja');
+        setLensOdType('Minus');
+        setLensOdValue(0.00);
+        setLensOdCyl(0.00);
+        setLensOsType('Minus');
+        setLensOsValue(0.00);
+        setLensOsCyl(0.00);
+        setAntiRadiasi(false);
+        setPhotochromic(false);
+        setShowPurchaseModal(true);
+    };
+
+    const handleBeliLangsung = (e: React.MouseEvent, item: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!auth.user) {
+            router.visit('/login');
+            return;
+        }
+        setSelectedProduk(item);
+        setPurchaseAction('buy');
+        setPurchaseType('Frame Saja');
+        setLensOdType('Minus');
+        setLensOdValue(0.00);
+        setLensOdCyl(0.00);
+        setLensOsType('Minus');
+        setLensOsValue(0.00);
+        setLensOsCyl(0.00);
+        setAntiRadiasi(false);
+        setPhotochromic(false);
+        setShowPurchaseModal(true);
+    };
+
+    const handleConfirmPurchase = () => {
+        if (!selectedProduk) return;
+
+        if (purchaseType === 'Frame + Lensa' && (lensOdValue === 0 && lensOsValue === 0)) {
+            toast.error('Mohon pilih ukuran lensa untuk mata kanan (OD) atau mata kiri (OS)');
+            return;
+        }
+
+        const payload = {
+            produk_id: selectedProduk.id,
+            jumlah: 1,
+            tipe_pembelian: purchaseType,
+            ...(purchaseType === 'Frame + Lensa' ? {
+                jenis_lensa_od: lensOdType,
+                nilai_lensa_od: String(lensOdValue),
+                silinder_od: String(lensOdCyl),
+                jenis_lensa_os: lensOsType,
+                nilai_lensa_os: String(lensOsValue),
+                silinder_os: String(lensOsCyl),
+                anti_radiasi: antiRadiasi,
+                photochromic: photochromic,
+            } : {})
+        };
+
+        if (purchaseAction === 'buy') {
+            router.post('/checkout/langsung', payload, {
+                preserveScroll: true,
+            });
+        } else {
+            router.post('/keranjang/tambah', payload, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setShowPurchaseModal(false);
+                }
+            });
+        }
+    };
 
     // Filter options from actual produk data (unique values)
     const mereks = useMemo(() => [...new Set(produk?.map((p: any) => p.merek) || [])].sort(), [produk]);
@@ -192,84 +335,47 @@ export default function Katalog() {
     return (
         <>
             <Head title="Katalog - EyeLit" />
-            <div className="min-h-screen bg-[#FDFDFC]">
+            <div className="min-h-screen bg-eyelit-theme">
                 {/* Navbar */}
-                <nav className="relative z-50 border-b border-[#19140035] bg-white">
+                <nav className="relative z-50 border-b" style={{ borderColor: 'rgba(255,255,255,0.15)', background: 'rgba(54,104,181,0.95)', backdropFilter: 'blur(12px)' }}>
                     <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 gap-4">
                         {/* Logo & Text */}
                         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-                            <img src="/images/logo/AuthMobile.svg" alt="EyeLit Logo" className="h-10 w-auto" />
-                            <span className="text-2xl font-bold text-[#2264c0]">EyeLit</span>
+                            <img src="/images/logo/AuthMobile.svg" alt="EyeLit Logo" className="h-10 w-auto brightness-0 invert" />
+                            <span className="text-2xl font-bold text-white">EyeLit</span>
                         </Link>
 
                         {/* Right Icons */}
                         <div className="flex items-center gap-2 flex-shrink-0">
-                            <Link href="/katalog" className="icon-btn icon-catalog p-2 rounded-full hover:bg-gray-100">
-                                <BookOpen className="size-5 text-[#2264c0]" />
+                            {auth.user?.peran === 'Admin' && (
+                                <Link
+                                    href="/dashboard"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-yellow-300 text-yellow-300 hover:bg-yellow-300/10 transition-colors"
+                                    title="Kembali ke Dashboard Admin"
+                                >
+                                    <LayoutGrid className="size-4" />
+                                    <span>Kembali ke Dashboard Admin</span>
+                                </Link>
+                            )}
+                            <Link href="/katalog" className="icon-btn icon-catalog p-2 rounded-full" style={{ color: '#ffffff' }}>
+                                <BookOpen className="size-5" />
                             </Link>
 
-                            {/* Notification Dropdown */}
+                            {/* Notification Link */}
                             {auth.user && (
-                            <div className="relative h-full flex items-center">
-                                <div
-                                    onMouseEnter={() => {
-                                        if (notifDropdownTimer.current) clearTimeout(notifDropdownTimer.current);
-                                        setShowNotifDropdown(true);
-                                    }}
-                                    onMouseLeave={() => {
-                                        notifDropdownTimer.current = setTimeout(() => setShowNotifDropdown(false), 100);
-                                    }}
+                                <Link
+                                    href="/notifications"
+                                    className="icon-btn icon-bell p-2 rounded-full relative"
+                                    style={{ color: '#ffffff' }}
+                                    title="Notifikasi"
                                 >
-                                    <button className="icon-btn icon-bell p-2 rounded-full hover:bg-gray-100 relative">
-                                        <Bell className="size-5 text-[#1b1b18]" />
-                                        {notifications.length > 0 && (
-                                            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                                        )}
-                                    </button>
-                                    {showNotifDropdown && (
-                                        <div
-                                            className="dropdown-menu show max-[439px]:left-4 max-[439px]:right-4 max-[439px]:translate-x-0"
-                                            style={{ top: '64px', right: '24px' }}
-                                            onMouseEnter={() => {
-                                                if (notifDropdownTimer.current) clearTimeout(notifDropdownTimer.current);
-                                            }}
-                                            onMouseLeave={() => {
-                                                notifDropdownTimer.current = setTimeout(() => setShowNotifDropdown(false), 100);
-                                            }}
-                                        >
-                                            <div className="dropdown-header">
-                                                <span className="text-sm font-semibold text-[#202124]">Notifikasi</span>
-                                            </div>
-                                            {notifications.length === 0 ? (
-                                                <div className="dropdown-notif-empty">
-                                                    <Bell className="size-10" />
-                                                    <p> Tidak ada notifikasi </p>
-                                                </div>
-                                            ) : (
-                                                <div className="max-h-80 overflow-y-auto">
-                                                    {notifications.map((notif: any, index: number) => (
-                                                        <Link key={index} href={notif.link || '#'} className="dropdown-notif-item">
-                                                            <div className="dropdown-notif-icon">
-                                                                <Bell className="size-5" />
-                                                            </div>
-                                                            <div className="dropdown-notif-content">
-                                                                <p className="dropdown-notif-title">{notif.title}</p>
-                                                                <p className="dropdown-notif-message">{notif.message}</p>
-                                                                <p className="dropdown-notif-time">{notif.time || 'Baru saja'}</p>
-                                                            </div>
-                                                        </Link>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            {notifications.length > 0 && (
-                                                <div className="dropdown-notif-footer">
-                                                    <Link href="/notifications">Lihat Semua</Link>
-                                                </div>
-                                            )}
-                                        </div>
+                                    <Bell className="size-5" />
+                                    {unreadNotificationsCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                                            {unreadNotificationsCount}
+                                        </span>
                                     )}
-                                </div>
-                            </div>
+                                </Link>
                             )}
 
                             {/* Cart Dropdown */}
@@ -284,11 +390,11 @@ export default function Katalog() {
                                         cartDropdownTimer.current = setTimeout(() => setShowCartDropdown(false), 100);
                                     }}
                                 >
-                                    <button className="icon-btn icon-cart p-2 rounded-full hover:bg-gray-100 relative">
-                                        <ShoppingCart className="size-5 text-[#1b1b18]" />
-                                        {cartItems.length > 0 && (
-                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#2264c0] text-white text-xs font-bold rounded-full flex items-center justify-center">
-                                                {cartItems.length}
+                                    <button className="icon-btn icon-cart p-2 rounded-full relative" style={{ color: '#ffffff' }}>
+                                        <ShoppingCart className="size-5" />
+                                        {keranjangCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#f28b27] text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                                {keranjangCount}
                                             </span>
                                         )}
                                     </button>
@@ -304,19 +410,23 @@ export default function Katalog() {
                                             }}
                                         >
                                             <div className="dropdown-header">
-                                                <span className="text-sm font-semibold text-[#202124]">Keranjang Belanja</span>
+                                                <span className="text-sm font-semibold text-[#e8f0fe]">Keranjang Belanja</span>
                                             </div>
                                             {cartItems.length === 0 ? (
                                                 <div className="dropdown-cart-empty">
                                                     <ShoppingCart className="size-10" />
-                                                    <p> Kamu belum memasukkan barang ke keranjang </p>
+                                                    <p className="text-[#7aa3e0]"> Kamu belum memasukkan barang ke keranjang </p>
                                                 </div>
                                             ) : (
                                                 <div className="max-h-80 overflow-y-auto">
                                                     {cartItems.map((item: any, index: number) => (
                                                         <div key={index} className="dropdown-cart-item">
                                                             <div className="dropdown-cart-image">
-                                                                <img src={item.gambar || '/images/placeholder.png'} alt={item.nama} />
+                                                                <img
+                                                                    src={item.gambar ? `/images/produk/${encodeURIComponent(item.gambar)}` : '/images/placeholder.png'}
+                                                                    alt={item.nama}
+                                                                    onError={(e) => { (e.currentTarget.src = '/images/placeholder.png'); }}
+                                                                />
                                                             </div>
                                                             <div className="dropdown-cart-info">
                                                                 <p className="dropdown-cart-name">{item.nama}</p>
@@ -329,7 +439,7 @@ export default function Katalog() {
                                             )}
                                             {cartItems.length > 0 && (
                                                 <div className="dropdown-cart-footer">
-                                                    <Link href="/cart">Lihat Keranjang</Link>
+                                                    <Link href="/keranjang">Lihat Keranjang</Link>
                                                 </div>
                                             )}
                                         </div>
@@ -350,8 +460,8 @@ export default function Katalog() {
                                             userDropdownTimer.current = setTimeout(() => setShowUserDropdown(false), 100);
                                         }}
                                     >
-                                        <button className="icon-btn icon-user p-2 rounded-full hover:bg-gray-100">
-                                            <User className="size-5 text-[#1b1b18]" />
+                                        <button className="icon-btn icon-user p-2 rounded-full" style={{ color: '#ffffff' }}>
+                                            <User className="size-5" />
                                         </button>
                                         {showUserDropdown && (
                                             <div
@@ -359,6 +469,7 @@ export default function Katalog() {
                                                 style={{ top: '64px', right: '24px' }}
                                                 onMouseEnter={() => {
                                                     if (userDropdownTimer.current) clearTimeout(userDropdownTimer.current);
+                                                    setShowUserDropdown(true);
                                                 }}
                                                 onMouseLeave={() => {
                                                     userDropdownTimer.current = setTimeout(() => setShowUserDropdown(false), 100);
@@ -374,7 +485,13 @@ export default function Katalog() {
                                                     </div>
                                                 </div>
                                                 <div className="dropdown-body">
-                                                    <Link href="#" className="dropdown-item">
+                                                    {auth.user?.peran === 'Admin' && (
+                                                        <Link href="/dashboard" className="dropdown-item" style={{ color: '#f28b27', fontWeight: 600 }}>
+                                                            <LayoutGrid className="size-5" />
+                                                            Admin Panel
+                                                        </Link>
+                                                    )}
+                                                    <Link href="/pesanan" className="dropdown-item">
                                                         <ShoppingBag className="size-5" />
                                                         Pembelian
                                                     </Link>
@@ -399,10 +516,10 @@ export default function Katalog() {
                             {/* Login/Register - hanya jika belum login */}
                             {!auth.user && (
                                 <div className="flex items-center gap-2">
-                                    <Link href="/login" className="px-4 py-2 text-sm font-medium text-[#1b1b18] hover:text-[#2264c0] transition-colors">
+                                    <Link href="/login" className="px-4 py-2 text-sm font-semibold text-white hover:text-[#fde9cb] transition-colors">
                                         Masuk
                                     </Link>
-                                    <Link href="/register" className="px-4 py-2 text-sm font-medium bg-[#2264c0] text-white rounded-full hover:bg-[#1a4f9a] transition-colors">
+                                    <Link href="/register" className="px-5 py-2 text-sm font-bold btn-orange-gradient rounded-full">
                                         Daftar
                                     </Link>
                                 </div>
@@ -412,12 +529,12 @@ export default function Katalog() {
                 </nav>
 
                 {/* Carousel Section */}
-                <section className="py-16 bg-white">
+                <section className="py-16 border-b" style={{ background: 'rgba(26,45,90,0.3)', borderColor: 'rgba(59,130,246,0.1)' }}>
                     <div className="container mx-auto px-4">
                         <div className="flex flex-col lg:flex-row items-center gap-12">
                             {/* Left: Image */}
                             <div className="w-full lg:w-1/2">
-                                <div className="relative rounded-2xl overflow-hidden shadow-xl">
+                                <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-blue-900/30">
                                     <img
                                         src={slides[currentSlide].image}
                                         alt={slides[currentSlide].title}
@@ -427,10 +544,10 @@ export default function Katalog() {
                             </div>
                             {/* Right: Text Content */}
                             <div className="w-full lg:w-1/2 text-center lg:text-left">
-                                <h2 className={`text-3xl lg:text-4xl font-bold text-[#1b1b18] mb-4 leading-tight ${textAnimClass}`}>
+                                <h2 className={`text-3xl lg:text-4xl font-bold text-[#e8f0fe] mb-4 leading-tight ${textAnimClass}`}>
                                     {slides[currentSlide].title}
                                 </h2>
-                                <p className={`text-[#5f6368] text-base lg:text-lg leading-relaxed mb-8 ${textAnimClass}`}>
+                                <p className={`text-[#7aa3e0] text-base lg:text-lg leading-relaxed mb-8 ${textAnimClass}`}>
                                     {slides[currentSlide].description}
                                 </p>
                                 <div className="flex items-center gap-4 justify-center lg:justify-start">
@@ -469,11 +586,11 @@ export default function Katalog() {
                 </section>
 
                 {/* Search Section */}
-                <section className="bg-white border-b border-[#19140035]">
+                <section className="border-b" style={{ background: 'rgba(255, 255, 255, 0.12)', borderColor: 'rgba(255,255,255,0.15)' }}>
                     <div className="mx-auto max-w-7xl px-4 py-6">
                         <div className="flex flex-col gap-4">
-                            <h2 className="text-2xl font-bold text-[#1b1b18] text-center">Temukan Kacamata Impianmu</h2>
-                            <p className="text-center text-[#5f6368] text-sm">Jelajahi berbagai koleksi kacamata terbaru dari berbagai merek ternama</p>
+                            <h2 className="text-2xl font-bold text-white text-center">Temukan Kacamata Impianmu</h2>
+                            <p className="text-center text-white/80 text-sm">Jelajahi berbagai koleksi kacamata terbaru dari berbagai merek ternama</p>
                             {/* Main Search Bar */}
                             <div className="w-full max-w-2xl mx-auto">
                                 <div className="relative">
@@ -485,7 +602,8 @@ export default function Katalog() {
                                         placeholder="Cari nama produk, merek, atau tipe kacamata..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm placeholder:text-[#9CA3AF] disabled:bg-transparent appearance-none focus:outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0"
+                                        style={{ background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.45)', color: '#ffffff' }}
+                                        className="w-full h-9 pl-4 pr-12 rounded-full text-sm placeholder:text-white/70 disabled:bg-transparent appearance-none focus:outline-none focus:border-white focus:ring-1 focus:ring-white"
                                     />
                                     {/* ✅ TAMBAHAN: Tombol clear search */}
                                     {searchQuery ? (
@@ -493,10 +611,10 @@ export default function Katalog() {
                                             onClick={() => setSearchQuery('')}
                                             className="absolute right-4 top-1/2 -translate-y-1/2"
                                         >
-                                            <X className="size-4 text-[#706f6c] hover:text-[#1b1b18]" />
+                                            <X className="size-4 text-white hover:text-[#fde9cb]" />
                                         </button>
                                     ) : (
-                                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
+                                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-white" />
                                     )}
                                 </div>
                             </div>
@@ -505,13 +623,13 @@ export default function Katalog() {
                 </section>
 
                 {/* Product Info & Filter Section */}
-                <section className="bg-white">
+                <section className="bg-transparent">
                     <div className="mx-auto max-w-7xl px-4 py-4">
                         <div className="flex items-center justify-between">
-                            <p className="text-sm font-semibold text-[#1b1b18]"><span>{filteredProduk?.length || 0}</span> produk ditemukan</p>
+                            <p className="text-sm font-bold text-slate-900"><span>{filteredProduk?.length || 0}</span> produk ditemukan</p>
                             <button
                                 onClick={() => setShowFilter(true)}
-                                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${hasActiveFilters ? 'bg-[#2264c0] text-white hover:bg-[#1a4f9a]' : 'bg-white text-[#1b1b18] border border-[#19140035] hover:bg-gray-50'}`}
+                                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${hasActiveFilters ? 'btn-orange-gradient' : 'bg-white/40 text-[#3668b5] border border-white/60 hover:bg-white/65'}`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="4" x2="20" y1="6" y2="6"/>
@@ -542,10 +660,10 @@ export default function Katalog() {
                         />
 
                         {/* Filter Panel */}
-                        <div className={`fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-xl overflow-y-auto ${showFilter && !filterClosing ? 'filter-panel-enter' : ''} ${filterClosing ? 'filter-panel-exit' : ''}`}>
+                        <div className={`fixed top-0 right-0 h-full w-80 bg-white/95 border-l border-white/40 z-50 shadow-2xl overflow-y-auto ${showFilter && !filterClosing ? 'filter-panel-enter' : ''} ${filterClosing ? 'filter-panel-exit' : ''}`}>
                             {/* Header */}
-                            <div className="flex items-center justify-between p-4 border-b border-[#19140035]">
-                                <h3 className="text-lg font-semibold text-[#1b1b18]">Filter</h3>
+                            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+                                <h3 className="text-lg font-semibold text-slate-800">Filter</h3>
                                 <button
                                     onClick={() => {
                                         setBackdropClosing(true);
@@ -556,9 +674,9 @@ export default function Katalog() {
                                             setBackdropClosing(false);
                                         }, 300);
                                     }}
-                                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                    className="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
                                 >
-                                    <X className="size-5 text-[#5f6368]" />
+                                    <X className="size-5" />
                                 </button>
                             </div>
 
@@ -566,16 +684,17 @@ export default function Katalog() {
                             <div className="p-4 space-y-6">
                                 {/* Merek with search */}
                                 <div>
-                                    <h4 className="text-sm font-semibold text-[#1b1b18] mb-3">Merek</h4>
+                                    <h4 className="text-sm font-semibold text-slate-800 mb-3">Merek</h4>
                                     <div className="relative mb-3">
                                         <input
                                             type="text"
                                             placeholder="Cari merek..."
                                             value={searchMerek}
                                             onChange={(e) => setSearchMerek(e.target.value)}
-                                            className="w-full h-9 pl-3 pr-8 rounded-lg border border-[#19140035] text-sm placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#2264c0]"
+                                            style={{ background: '#f8fafc', border: '1px solid #cbd5e1', color: '#1e293b' }}
+                                            className="w-full h-9 pl-3 pr-8 rounded-lg text-sm placeholder:text-slate-400 focus:outline-none focus:border-orange-400"
                                         />
-                                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-[#706f6c]" />
+                                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                                     </div>
                                     <div className="space-y-2">
                                         {filteredMereks.map((merek) => (
@@ -584,9 +703,9 @@ export default function Katalog() {
                                                     type="checkbox"
                                                     checked={selectedMerek.includes(merek)}
                                                     onChange={() => toggleFilter(selectedMerek, setSelectedMerek, merek)}
-                                                    className="w-4 h-4 rounded border-[#19140035] text-[#2264c0] focus:ring-[#2264c0] cursor-pointer"
+                                                    className="w-4 h-4 rounded border-slate-300 bg-slate-50 text-orange-500 focus:ring-orange-500 cursor-pointer"
                                                 />
-                                                <span className="text-sm text-[#1b1b18] group-hover:text-[#2264c0] transition-colors">{merek}</span>
+                                                <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{merek}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -594,7 +713,7 @@ export default function Katalog() {
 
                                 {/* Jenis Kelamin */}
                                 <div>
-                                    <h4 className="text-sm font-semibold text-[#1b1b18] mb-3">Jenis Kelamin</h4>
+                                    <h4 className="text-sm font-semibold text-slate-800 mb-3">Jenis Kelamin</h4>
                                     <div className="space-y-2">
                                         {jenisKelamins.map((jk) => (
                                             <label key={jk} className="flex items-center gap-3 cursor-pointer group">
@@ -602,9 +721,9 @@ export default function Katalog() {
                                                     type="checkbox"
                                                     checked={selectedJenisKelamin.includes(jk)}
                                                     onChange={() => toggleFilter(selectedJenisKelamin, setSelectedJenisKelamin, jk)}
-                                                    className="w-4 h-4 rounded border-[#19140035] text-[#2264c0] focus:ring-[#2264c0] cursor-pointer"
+                                                    className="w-4 h-4 rounded border-slate-300 bg-slate-50 text-orange-500 focus:ring-orange-500 cursor-pointer"
                                                 />
-                                                <span className="text-sm text-[#1b1b18] group-hover:text-[#2264c0] transition-colors">{jk}</span>
+                                                <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{jk}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -612,7 +731,7 @@ export default function Katalog() {
 
                                 {/* Warna */}
                                 <div>
-                                    <h4 className="text-sm font-semibold text-[#1b1b18] mb-3">Warna</h4>
+                                    <h4 className="text-sm font-semibold text-slate-800 mb-3">Warna</h4>
                                     <div className="space-y-2">
                                         {warnas.map((warna) => (
                                             <label key={warna} className="flex items-center gap-3 cursor-pointer group">
@@ -620,9 +739,9 @@ export default function Katalog() {
                                                     type="checkbox"
                                                     checked={selectedWarna.includes(warna)}
                                                     onChange={() => toggleFilter(selectedWarna, setSelectedWarna, warna)}
-                                                    className="w-4 h-4 rounded border-[#19140035] text-[#2264c0] focus:ring-[#2264c0] cursor-pointer"
+                                                    className="w-4 h-4 rounded border-slate-300 bg-slate-50 text-orange-500 focus:ring-orange-500 cursor-pointer"
                                                 />
-                                                <span className="text-sm text-[#1b1b18] group-hover:text-[#2264c0] transition-colors">{warna}</span>
+                                                <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{warna}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -630,7 +749,7 @@ export default function Katalog() {
 
                                 {/* Material */}
                                 <div>
-                                    <h4 className="text-sm font-semibold text-[#1b1b18] mb-3">Material</h4>
+                                    <h4 className="text-sm font-semibold text-slate-800 mb-3">Material</h4>
                                     <div className="space-y-2">
                                         {materials.map((material) => (
                                             <label key={material} className="flex items-center gap-3 cursor-pointer group">
@@ -638,9 +757,9 @@ export default function Katalog() {
                                                     type="checkbox"
                                                     checked={selectedMaterial.includes(material)}
                                                     onChange={() => toggleFilter(selectedMaterial, setSelectedMaterial, material)}
-                                                    className="w-4 h-4 rounded border-[#19140035] text-[#2264c0] focus:ring-[#2264c0] cursor-pointer"
+                                                    className="w-4 h-4 rounded border-slate-300 bg-slate-50 text-orange-500 focus:ring-orange-500 cursor-pointer"
                                                 />
-                                                <span className="text-sm text-[#1b1b18] group-hover:text-[#2264c0] transition-colors">{material}</span>
+                                                <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{material}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -648,7 +767,7 @@ export default function Katalog() {
 
                                 {/* Bentuk */}
                                 <div>
-                                    <h4 className="text-sm font-semibold text-[#1b1b18] mb-3">Bentuk</h4>
+                                    <h4 className="text-sm font-semibold text-slate-800 mb-3">Bentuk</h4>
                                     <div className="space-y-2">
                                         {bentuks.map((bentuk) => (
                                             <label key={bentuk} className="flex items-center gap-3 cursor-pointer group">
@@ -656,9 +775,9 @@ export default function Katalog() {
                                                     type="checkbox"
                                                     checked={selectedBentuk.includes(bentuk)}
                                                     onChange={() => toggleFilter(selectedBentuk, setSelectedBentuk, bentuk)}
-                                                    className="w-4 h-4 rounded border-[#19140035] text-[#2264c0] focus:ring-[#2264c0] cursor-pointer"
+                                                    className="w-4 h-4 rounded border-slate-300 bg-slate-50 text-orange-500 focus:ring-orange-500 cursor-pointer"
                                                 />
-                                                <span className="text-sm text-[#1b1b18] group-hover:text-[#2264c0] transition-colors">{bentuk}</span>
+                                                <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{bentuk}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -666,7 +785,7 @@ export default function Katalog() {
 
                                 {/* Harga */}
                                 <div>
-                                    <h4 className="text-sm font-semibold text-[#1b1b18] mb-3">Harga</h4>
+                                    <h4 className="text-sm font-semibold text-slate-800 mb-3">Harga</h4>
                                     <div className="flex items-center gap-2">
                                         <div className="flex-1">
                                             <input
@@ -683,10 +802,11 @@ export default function Katalog() {
                                                         setHargaError('');
                                                     }
                                                 }}
-                                                className={`w-full h-9 px-3 rounded-lg border text-sm placeholder:text-[#9CA3AF] focus:outline-none ${hargaError ? 'border-red-500 focus:border-red-500' : 'border-[#19140035] focus:border-[#2264c0]'}`}
+                                                style={{ background: '#f8fafc', border: '1px solid #cbd5e1', color: '#1e293b' }}
+                                                className={`w-full h-9 px-3 rounded-lg text-sm placeholder:text-slate-400 focus:outline-none ${hargaError ? 'border-red-500' : 'focus:border-orange-400'}`}
                                             />
                                         </div>
-                                        <span className="text-sm text-[#5f6368]">-</span>
+                                        <span className="text-sm text-slate-400">-</span>
                                         <div className="flex-1">
                                             <input
                                                 type="text"
@@ -702,7 +822,8 @@ export default function Katalog() {
                                                         setHargaError('');
                                                     }
                                                 }}
-                                                className={`w-full h-9 px-3 rounded-lg border text-sm placeholder:text-[#9CA3AF] focus:outline-none ${hargaError ? 'border-red-500 focus:border-red-500' : 'border-[#19140035] focus:border-[#2264c0]'}`}
+                                                style={{ background: '#f8fafc', border: '1px solid #cbd5e1', color: '#1e293b' }}
+                                                className={`w-full h-9 px-3 rounded-lg text-sm placeholder:text-slate-400 focus:outline-none ${hargaError ? 'border-red-500' : 'focus:border-orange-400'}`}
                                             />
                                         </div>
                                     </div>
@@ -713,10 +834,10 @@ export default function Katalog() {
                             </div>
 
                             {/* Footer */}
-                            <div className="sticky bottom-0 bg-white border-t border-[#19140035] p-4 flex gap-3">
+                            <div className="sticky bottom-0 bg-white border-t border-slate-200 p-4 flex gap-3">
                                 <button
                                     onClick={clearFilters}
-                                    className="flex-1 py-2 text-sm font-medium text-[#1b1b18] border border-[#19140035] rounded-lg hover:bg-gray-50 transition-colors"
+                                    className="flex-1 py-2 text-sm font-semibold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                                 >
                                     Hapus Filter
                                 </button>
@@ -730,7 +851,7 @@ export default function Katalog() {
                                             setBackdropClosing(false);
                                         }, 300);
                                     }}
-                                    className="flex-1 py-2 text-sm font-medium bg-[#2264c0] text-white rounded-lg hover:bg-[#1a4f9a] transition-colors"
+                                    className="flex-1 py-2 text-sm font-bold btn-orange-gradient rounded-lg"
                                 >
                                     Tampilkan {filteredProduk?.length || 0}
                                 </button>
@@ -743,49 +864,325 @@ export default function Katalog() {
                 <section>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
                         {filteredProduk?.map((item: any) => (
-                            <Link key={item.id} href={`/produk/${item.id}`}>
-                                <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden cursor-pointer group">
+                            <div key={item.id} className="rounded-xl shadow-md bg-white hover:shadow-[0_8px_30px_rgba(54,104,181,0.18)] hover:-translate-y-1 transition-all duration-300 overflow-hidden group flex flex-col h-full">
+                                {/* Clickable area - navigates to product detail */}
+                                <Link href={`/produk/${item.id}`} className="flex flex-col flex-1 cursor-pointer">
                                     {/* Product Image */}
-                                    <div className="aspect-square overflow-hidden bg-gray-50">
+                                    <div className="aspect-square overflow-hidden bg-white relative">
                                         <img
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            style={{ mixBlendMode: 'multiply' }}
                                             src={item.gambar ? `/images/produk/${encodeURIComponent(item.gambar)}` : '/images/placeholder.png'}
                                             alt={item.nama_produk ?? 'Produk'}
                                             onError={(e) => { (e.currentTarget.src = '/images/placeholder.png'); }}
                                         />
+                                        {item.stok === 0 && (
+                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                <span className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Habis</span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Product Info */}
-                                    <div className="p-3">
-                                        {/* Product Name */}
-                                        <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1 leading-tight">
-                                            {item.nama_produk ?? 'Nama tidak tersedia'}
-                                        </h3>
+                                    <div className="p-3 flex flex-col justify-between flex-1">
+                                        <div>
+                                            {/* Brand */}
+                                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#3668b5] mb-0.5">
+                                                {item.merek ?? '-'}
+                                            </p>
 
-                                        {/* Brand */}
-                                        <p className="text-xs text-gray-500 mb-2">
-                                            {item.merek ?? '-'}
-                                        </p>
+                                            {/* Product Name */}
+                                            <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 mb-1.5 leading-tight group-hover:text-[#f28b27] transition-colors">
+                                                {item.nama_produk ?? 'Nama tidak tersedia'}
+                                            </h3>
+                                        </div>
 
                                         {/* Price */}
-                                        <p className="text-lg font-bold text-[#2264c0]">
+                                        <p className="text-base font-bold text-slate-900">
                                             Rp {(Number(item.harga_produk ?? 0) || 0).toLocaleString('id-ID')}
                                         </p>
                                     </div>
+                                </Link>
+
+                                {/* Action Buttons - outside Link so they work independently */}
+                                <div className="px-3 pb-3 pt-0">
+                                    <div className="pt-3 border-t border-slate-200/80 flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleAddToCart(e, item)}
+                                            disabled={item.stok === 0}
+                                            className="flex-1 py-2 px-1 rounded-lg border border-[#3668b5]/50 text-[#3668b5] text-[10px] md:text-[11px] font-bold hover:bg-[#3668b5]/10 active:scale-95 transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                            title="Tambah ke Keranjang"
+                                        >
+                                            <ShoppingCart className="size-3.5 flex-shrink-0" />
+                                            <span>+ Keranjang</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleBeliLangsung(e, item)}
+                                            disabled={item.stok === 0}
+                                            className="flex-1 py-2 px-1 rounded-lg btn-orange-gradient text-[10px] md:text-[11px] font-bold active:scale-95 transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                            title="Beli Langsung"
+                                        >
+                                            <ShoppingBag className="size-3.5 flex-shrink-0" />
+                                            <span>Beli</span>
+                                        </button>
+                                    </div>
                                 </div>
-                            </Link>
+                            </div>
                         ))}
 
                         {/* Empty state jika tidak ada produk ditemukan */}
                         {filteredProduk?.length === 0 && (
                             <div className="col-span-2 md:col-span-4 flex flex-col items-center justify-center py-24 gap-3">
-                                <Search className="size-12 text-[#9CA3AF]" />
-                                <p className="text-[#5f6368] font-medium">Produk tidak ditemukan</p>
-                                <p className="text-sm text-[#9CA3AF]">Coba kata kunci lain atau hapus filter yang aktif</p>
+                                <Search className="size-12 text-slate-400" />
+                                <p className="text-slate-700 font-bold">Produk tidak ditemukan</p>
+                                <p className="text-sm text-slate-500">Coba kata kunci lain atau hapus filter yang aktif</p>
                             </div>
                         )}
                     </div>
                 </section>
+
+                {/* Pop Up Modal Pembelian Lensa */}
+                {showPurchaseModal && selectedProduk && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm transition-all duration-300">
+                        <div className="bg-white/95 backdrop-blur-md border border-white/60 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 md:p-8 flex flex-col gap-6 scale-100 transition-all duration-300">
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+                                <h3 className="text-xl font-bold text-slate-900">Pilihan Pembelian</h3>
+                                <button 
+                                    onClick={() => setShowPurchaseModal(false)}
+                                    className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100/50"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Product Info Card */}
+                            <div className="flex gap-4 p-3 bg-white/50 rounded-2xl border border-white/40 items-center">
+                                <img 
+                                    src={selectedProduk.gambar ? `/images/produk/${encodeURIComponent(selectedProduk.gambar)}` : '/images/placeholder.png'} 
+                                    alt={selectedProduk.nama_produk} 
+                                    className="w-16 h-16 object-contain rounded-lg bg-white p-1"
+                                    style={{ mixBlendMode: 'multiply' }}
+                                    onError={(e) => { e.currentTarget.src = '/images/placeholder.png'; }}
+                                />
+                                <div>
+                                    <h4 className="font-bold text-slate-800 text-sm">{selectedProduk.nama_produk}</h4>
+                                    <p className="text-[#f28b27] font-bold text-sm">Rp {Number(selectedProduk.harga_produk).toLocaleString('id-ID')}</p>
+                                </div>
+                            </div>
+
+                            {/* Option Frame Saja / Frame + Lensa */}
+                            <div>
+                                <span className="block text-sm font-semibold text-slate-700 mb-2">Tipe Pembelian</span>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPurchaseType('Frame Saja')}
+                                        className={`py-3 px-4 rounded-2xl border-2 font-bold text-sm transition-all text-center flex flex-col items-center justify-center gap-1 ${
+                                            purchaseType === 'Frame Saja'
+                                                ? 'border-[#3668b5] bg-[#3668b5]/5 text-[#3668b5]'
+                                                : 'border-slate-200 bg-white/50 text-slate-600 hover:border-slate-300'
+                                        }`}
+                                    >
+                                        <span>Frame Saja</span>
+                                        <span className="text-[10px] opacity-75 font-normal">Hanya bingkai kacamata</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPurchaseType('Frame + Lensa')}
+                                        className={`py-3 px-4 rounded-2xl border-2 font-bold text-sm transition-all text-center flex flex-col items-center justify-center gap-1 ${
+                                            purchaseType === 'Frame + Lensa'
+                                                ? 'border-[#3668b5] bg-[#3668b5]/5 text-[#3668b5]'
+                                                : 'border-slate-200 bg-white/50 text-slate-600 hover:border-slate-300'
+                                        }`}
+                                    >
+                                        <span>Frame + Lensa</span>
+                                        <span className="text-[10px] opacity-75 font-normal">Termasuk lensa kustom</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Lens Option Details */}
+                            {purchaseType === 'Frame + Lensa' && (
+                                <div className="flex flex-col gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                    <h5 className="font-bold text-slate-800 text-sm border-b border-slate-200 pb-2">Ukuran & Tipe Lensa</h5>
+                                    
+                                    {/* Right Eye (OD) */}
+                                    <div>
+                                        <span className="block text-xs font-bold text-[#3668b5] uppercase tracking-wider mb-2">Mata Kanan (OD)</span>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-500 mb-1">Tipe</label>
+                                                <select 
+                                                    value={lensOdType} 
+                                                    onChange={(e) => setLensOdType(e.target.value)}
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#3668b5]"
+                                                >
+                                                    <option value="Minus">Minus</option>
+                                                    <option value="Plus">Plus</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-500 mb-1">Ukuran (SPH)</label>
+                                                <select 
+                                                    value={lensOdValue} 
+                                                    onChange={(e) => setLensOdValue(Number(e.target.value))}
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#3668b5]"
+                                                >
+                                                    {lensValues.map(v => (
+                                                        <option key={v} value={v}>{v.toFixed(2)}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-500 mb-1">Silinder (CYL)</label>
+                                                <select 
+                                                    value={lensOdCyl} 
+                                                    onChange={(e) => setLensOdCyl(Number(e.target.value))}
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#3668b5]"
+                                                >
+                                                    {cylinderValues.map(v => (
+                                                        <option key={v} value={v}>{v.toFixed(2)}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Left Eye (OS) */}
+                                    <div className="mt-2">
+                                        <span className="block text-xs font-bold text-[#3668b5] uppercase tracking-wider mb-2">Mata Kiri (OS)</span>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-500 mb-1">Tipe</label>
+                                                <select 
+                                                    value={lensOsType} 
+                                                    onChange={(e) => setLensOsType(e.target.value)}
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#3668b5]"
+                                                >
+                                                    <option value="Minus">Minus</option>
+                                                    <option value="Plus">Plus</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-500 mb-1">Ukuran (SPH)</label>
+                                                <select 
+                                                    value={lensOsValue} 
+                                                    onChange={(e) => setLensOsValue(Number(e.target.value))}
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#3668b5]"
+                                                >
+                                                    {lensValues.map(v => (
+                                                        <option key={v} value={v}>{v.toFixed(2)}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-500 mb-1">Silinder (CYL)</label>
+                                                <select 
+                                                    value={lensOsCyl} 
+                                                    onChange={(e) => setLensOsCyl(Number(e.target.value))}
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#3668b5]"
+                                                >
+                                                    {cylinderValues.map(v => (
+                                                        <option key={v} value={v}>{v.toFixed(2)}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Fitur Tambahan */}
+                                    <div className="border-t border-slate-200 pt-3 flex flex-col gap-2 mt-1">
+                                        <span className="block text-xs font-bold text-slate-700">Fitur Tambahan Lensa</span>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={antiRadiasi} 
+                                                    onChange={(e) => setAntiRadiasi(e.target.checked)}
+                                                    className="rounded border-slate-300 text-[#3668b5] focus:ring-[#3668b5] w-4 h-4"
+                                                />
+                                                <span>Anti Radiasi (+Rp {Number(hargaAntiRadiasi).toLocaleString('id-ID')})</span>
+                                            </label>
+                                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={photochromic} 
+                                                    onChange={(e) => setPhotochromic(e.target.checked)}
+                                                    className="rounded border-slate-300 text-[#3668b5] focus:ring-[#3668b5] w-4 h-4"
+                                                />
+                                                <span>Photochromic (+Rp {Number(hargaPhotochromic).toLocaleString('id-ID')})</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Price Breakdown & Total */}
+                            <div className="border-t border-slate-200 pt-4 flex flex-col gap-2">
+                                <h5 className="font-bold text-slate-800 text-sm">Rincian Harga</h5>
+                                <div className="flex justify-between text-xs text-slate-600 font-semibold">
+                                    <span>Harga Bingkai:</span>
+                                    <span>Rp {Number(selectedProduk.harga_produk).toLocaleString('id-ID')}</span>
+                                </div>
+                                {purchaseType === 'Frame + Lensa' && (
+                                    <>
+                                        {(lensOdValue > 0 || lensOdCyl > 0) && (
+                                            <div className="flex justify-between text-xs text-slate-600 font-semibold">
+                                                <span>Lensa Kanan (OD):</span>
+                                                <span>Rp {Number(odPrice).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        )}
+                                        {(lensOsValue > 0 || lensOsCyl > 0) && (
+                                            <div className="flex justify-between text-xs text-slate-600 font-semibold">
+                                                <span>Lensa Kiri (OS):</span>
+                                                <span>Rp {Number(osPrice).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        )}
+                                        {antiRadiasi && (
+                                            <div className="flex justify-between text-xs text-slate-600 font-semibold">
+                                                <span>Anti Radiasi:</span>
+                                                <span>Rp {Number(hargaAntiRadiasi).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        )}
+                                        {photochromic && (
+                                            <div className="flex justify-between text-xs text-slate-600 font-semibold">
+                                                <span>Photochromic:</span>
+                                                <span>Rp {Number(hargaPhotochromic).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                                <div className="flex justify-between items-center text-slate-900 border-t border-slate-200 pt-2 mt-1">
+                                    <span className="font-bold text-sm">Total:</span>
+                                    <span className="font-bold text-lg text-[#f28b27]">Rp {calculateTotalPrice().toLocaleString('id-ID')}</span>
+                                </div>
+                            </div>
+
+                            {/* Confirm Actions */}
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPurchaseModal(false)}
+                                    className="flex-1 py-3 border border-slate-300 rounded-full font-bold text-sm text-slate-600 hover:bg-slate-100 transition-colors text-center cursor-pointer"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleConfirmPurchase}
+                                    className="flex-1 py-3 rounded-full btn-orange-gradient text-white font-bold text-sm text-center cursor-pointer shadow-lg shadow-orange-500/20"
+                                >
+                                    {purchaseAction === 'buy' ? 'Beli Sekarang' : 'Masukkan Keranjang'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

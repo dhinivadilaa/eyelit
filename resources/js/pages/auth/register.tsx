@@ -339,7 +339,7 @@ export default function Register() {
 
                     <Button
                         type="submit"
-                        className="mt-2 h-12 w-full bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
+                        className="mt-2 h-12 w-full btn-orange-gradient"
                         tabIndex={8}
                         disabled={processing}
                         data-test="register-user-button"
@@ -351,7 +351,7 @@ export default function Register() {
 
                 <div className="text-center text-sm text-muted-foreground">
                     Sudah punya akun?{' '}
-                    <TextLink href={login()} tabIndex={9} className="text-[#2264c0] font-medium">
+                    <TextLink href={login()} tabIndex={9} className="text-blue-600 font-semibold hover:text-blue-800">
                         Masuk
                     </TextLink>
                 </div>

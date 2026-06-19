@@ -34,8 +34,8 @@ export default function AuthSplitLayout({
             </div>
 
             {/* Kolom Kanan - Form */}
-            <div className="w-full lg:p-8">
-                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
+            <div className="w-full lg:p-8 min-h-screen lg:min-h-dvh flex items-center justify-center bg-eyelit-theme">
+                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px] w-full card-glass-light p-8 rounded-2xl shadow-xl border border-white/20">
                     <a href="/" className="max-lg:block hidden z-20 mx-auto size-14">
                     <img
                         src="/images/logo/AuthMobile.svg"
@@ -44,8 +44,8 @@ export default function AuthSplitLayout({
                     />
                     </a>
                     <div className="flex flex-col items-center gap-2 text-center">
-                        <h1 className="text-2xl font-semibold">{title}</h1>
-                        <p className="text-sm text-balance text-muted-foreground">
+                        <h1 className="text-2xl font-bold text-slate-800">{title}</h1>
+                        <p className="text-sm text-balance text-slate-500">
                             {description}
                         </p>
                     </div>

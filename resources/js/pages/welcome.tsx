@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User } from 'lucide-react';
+import { Bell, BookOpen, LayoutGrid, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User, MessageCircle } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 
 export default function Welcome() {
@@ -14,15 +14,13 @@ export default function Welcome() {
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Mock cart items - replace with actual data from backend
-    const cartItems: any[] = auth.user?.cartItems || [];
-    // Mock notifications - replace with actual data from backend
+    const cartItems: any[] = auth.cart_items || [];
+    const keranjangCount: number = auth.keranjang_count || 0;
     const notifications: any[] = auth.user?.notifications || [];
+    const unreadNotificationsCount = notifications.filter((n: any) => !n.dibaca).length;
 
     // Carousel data - add new information slides here
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [imageAnimClass, setImageAnimClass] = useState('');
-    const [textAnimClass, setTextAnimClass] = useState('');
-    const [buttonAnimClass, setButtonAnimClass] = useState('');
 
     const slides = [
         {
@@ -38,68 +36,32 @@ export default function Welcome() {
     ];
 
     const handlePrev = () => {
-        setImageAnimClass('carousel-image-out');
-        setTextAnimClass('carousel-text-out');
-        setButtonAnimClass('carousel-button-click');
-
-        setTimeout(() => {
-            setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-            setImageAnimClass('carousel-image-in');
-            setTextAnimClass('carousel-text-in');
-            setButtonAnimClass('');
-            setTimeout(() => {
-                setImageAnimClass('');
-                setTextAnimClass('');
-            }, 250);
-        }, 400);
+        setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
     };
 
     const handleNext = () => {
-        setImageAnimClass('carousel-image-out');
-        setTextAnimClass('carousel-text-out');
-        setButtonAnimClass('carousel-button-click');
-
-        setTimeout(() => {
-            setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-            setImageAnimClass('carousel-image-in');
-            setTextAnimClass('carousel-text-in');
-            setButtonAnimClass('');
-            setTimeout(() => {
-                setImageAnimClass('');
-                setTextAnimClass('');
-            }, 250);
-        }, 400);
+        setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     };
 
-    // Auto-play carousel every 6 seconds
+    // Auto-play carousel setiap 5 detik
     useEffect(() => {
         const interval = setInterval(() => {
-            setImageAnimClass('carousel-image-out');
-            setTextAnimClass('carousel-text-out');
-            setTimeout(() => {
-                setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-                setImageAnimClass('carousel-image-in');
-                setTextAnimClass('carousel-text-in');
-                setTimeout(() => {
-                    setImageAnimClass('');
-                    setTextAnimClass('');
-                }, 250);
-            }, 400);
-        }, 6000);
+            setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+        }, 5000);
         return () => clearInterval(interval);
-    }, []);
+    }, [slides.length]);
 
     return (
         <>
             <Head title="EyeLit" />
-            <div className="min-h-screen bg-[#FDFDFC]">
+            <div className="min-h-screen bg-eyelit-theme">
                 {/* Navbar */}
-                <nav className="relative z-50 border-b border-[#19140035] bg-white">
+                <nav className="relative z-50 border-b" style={{ borderColor: 'rgba(255,255,255,0.15)', background: 'rgba(54,104,181,0.95)', backdropFilter: 'blur(12px)' }}>
                     <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 gap-4">
                         {/* Logo & Text */}
                         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-                            <img src="/images/logo/AuthMobile.svg" alt="EyeLit Logo" className="h-10 w-auto" />
-                            <span className="text-2xl font-bold text-[#2264c0]">EyeLit</span>
+                            <img src="/images/logo/AuthMobile.svg" alt="EyeLit Logo" className="h-10 w-auto brightness-0 invert" />
+                            <span className="text-2xl font-bold text-white">EyeLit</span>
                         </Link>
 
                         {/* Search Bar - Center (hide on mobile <440px) */}
@@ -110,80 +72,44 @@ export default function Welcome() {
                                     autoComplete="off"
                                     spellCheck={false}
                                     placeholder="Cari produk kacamata..."
-                                    className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm placeholder:text-[#9CA3AF] disabled:bg-transparent appearance-none focus:outline-none outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0 [&:focus-visible]:outline-none [&::-webkit-search-decoration]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden outline-none [&:focus-visible]:outline-none [&:focus-visible]:ring-0 [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:![-webkit-box-shadow:0_0_0_100px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#1b1b18]"
+                                    className="w-full h-9 pl-4 pr-12 rounded-full text-sm placeholder:text-white/70 appearance-none focus:outline-none"
+                                    style={{ background: 'rgba(255, 255, 255, 0.25)', border: '1px solid rgba(255, 255, 255, 0.45)', color: '#ffffff' }}
                                 />
-                                <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
+                                <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-white" />
                             </div>
                         </div>
 
                         {/* Right Icons */}
                         <div className="flex items-center gap-2 flex-shrink-0">
-                            <Link href="/katalog" className="icon-btn icon-catalog p-2 rounded-full hover:bg-gray-100">
-                                <BookOpen className="size-5 text-[#1b1b18]" />
+                            {auth.user?.peran === 'Admin' && (
+                                <Link
+                                    href="/dashboard"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-yellow-300 text-yellow-300 hover:bg-yellow-300/10 transition-colors"
+                                    title="Kembali ke Dashboard Admin"
+                                >
+                                    <LayoutGrid className="size-4" />
+                                    <span>Kembali ke Dashboard Admin</span>
+                                </Link>
+                            )}
+                            <Link href="/katalog" className="icon-btn icon-catalog p-2 rounded-full" style={{ color: '#93c5fd' }}>
+                                <BookOpen className="size-5" />
                             </Link>
 
-                            {/* Notification Dropdown */}
+                            {/* Notification Link */}
                             {auth.user && (
-                            <div className="relative h-full flex items-center">
-                                <div
-                                    onMouseEnter={() => {
-                                        if (notifDropdownTimer.current) clearTimeout(notifDropdownTimer.current);
-                                        setShowNotifDropdown(true);
-                                    }}
-                                    onMouseLeave={() => {
-                                        notifDropdownTimer.current = setTimeout(() => setShowNotifDropdown(false), 100);
-                                    }}
+                                <Link
+                                    href="/notifications"
+                                    className="icon-btn icon-bell p-2 rounded-full relative"
+                                    style={{ color: '#93c5fd' }}
+                                    title="Notifikasi"
                                 >
-                                    <button className="icon-btn icon-bell p-2 rounded-full hover:bg-gray-100 relative">
-                                        <Bell className="size-5 text-[#1b1b18]" />
-                                        {notifications.length > 0 && (
-                                            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                                        )}
-                                    </button>
-                                    {showNotifDropdown && (
-                                        <div
-                                            className="dropdown-menu show max-[439px]:left-4 max-[439px]:right-4 max-[439px]:translate-x-0"
-                                            style={{ top: '64px', right: '24px' }}
-                                            onMouseEnter={() => {
-                                                if (notifDropdownTimer.current) clearTimeout(notifDropdownTimer.current);
-                                            }}
-                                            onMouseLeave={() => {
-                                                notifDropdownTimer.current = setTimeout(() => setShowNotifDropdown(false), 100);
-                                            }}
-                                        >
-                                            <div className="dropdown-header">
-                                                <span className="text-sm font-semibold text-[#202124]">Notifikasi</span>
-                                            </div>
-                                            {notifications.length === 0 ? (
-                                                <div className="dropdown-notif-empty">
-                                                    <Bell className="size-10" />
-                                                    <p> Tidak ada notifikasi </p>
-                                                </div>
-                                            ) : (
-                                                <div className="max-h-80 overflow-y-auto">
-                                                    {notifications.map((notif: any, index: number) => (
-                                                        <Link key={index} href={notif.link || '#'} className="dropdown-notif-item">
-                                                            <div className="dropdown-notif-icon">
-                                                                <Bell className="size-5" />
-                                                            </div>
-                                                            <div className="dropdown-notif-content">
-                                                                <p className="dropdown-notif-title">{notif.title}</p>
-                                                                <p className="dropdown-notif-message">{notif.message}</p>
-                                                                <p className="dropdown-notif-time">{notif.time || 'Baru saja'}</p>
-                                                            </div>
-                                                        </Link>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            {notifications.length > 0 && (
-                                                <div className="dropdown-notif-footer">
-                                                    <Link href="/notifications">Lihat Semua</Link>
-                                                </div>
-                                            )}
-                                        </div>
+                                    <Bell className="size-5" />
+                                    {unreadNotificationsCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                                            {unreadNotificationsCount}
+                                        </span>
                                     )}
-                                </div>
-                            </div>
+                                </Link>
                             )}
 
                             {/* Cart Dropdown */}
@@ -198,11 +124,11 @@ export default function Welcome() {
                                         cartDropdownTimer.current = setTimeout(() => setShowCartDropdown(false), 100);
                                     }}
                                 >
-                                    <button className="icon-btn icon-cart p-2 rounded-full hover:bg-gray-100 relative">
-                                        <ShoppingCart className="size-5 text-[#1b1b18]" />
-                                        {cartItems.length > 0 && (
-                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#2264c0] text-white text-xs font-bold rounded-full flex items-center justify-center">
-                                                {cartItems.length}
+                                    <button className="icon-btn icon-cart p-2 rounded-full relative" style={{ color: '#93c5fd' }}>
+                                        <ShoppingCart className="size-5" />
+                                        {keranjangCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                                {keranjangCount}
                                             </span>
                                         )}
                                     </button>
@@ -218,7 +144,7 @@ export default function Welcome() {
                                             }}
                                         >
                                             <div className="dropdown-header">
-                                                <span className="text-sm font-semibold text-[#202124]">Keranjang Belanja</span>
+                                                <span className="text-sm font-semibold text-[#e8f0fe]">Keranjang Belanja</span>
                                             </div>
                                             {cartItems.length === 0 ? (
                                                 <div className="dropdown-cart-empty">
@@ -230,7 +156,11 @@ export default function Welcome() {
                                                     {cartItems.map((item: any, index: number) => (
                                                         <div key={index} className="dropdown-cart-item">
                                                             <div className="dropdown-cart-image">
-                                                                <img src={item.gambar || '/images/placeholder.png'} alt={item.nama} />
+                                                                <img
+                                                                    src={item.gambar ? `/images/produk/${encodeURIComponent(item.gambar)}` : '/images/placeholder.png'}
+                                                                    alt={item.nama}
+                                                                    onError={(e) => { (e.currentTarget.src = '/images/placeholder.png'); }}
+                                                                />
                                                             </div>
                                                             <div className="dropdown-cart-info">
                                                                 <p className="dropdown-cart-name">{item.nama}</p>
@@ -243,7 +173,7 @@ export default function Welcome() {
                                             )}
                                             {cartItems.length > 0 && (
                                                 <div className="dropdown-cart-footer">
-                                                    <Link href="/cart">Lihat Keranjang</Link>
+                                                    <Link href="/keranjang">Lihat Keranjang</Link>
                                                 </div>
                                             )}
                                         </div>
@@ -264,8 +194,8 @@ export default function Welcome() {
                                             userDropdownTimer.current = setTimeout(() => setShowUserDropdown(false), 100);
                                         }}
                                     >
-                                        <button className="icon-btn icon-user p-2 rounded-full hover:bg-gray-100">
-                                            <User className="size-5 text-[#1b1b18]" />
+                                        <button className="icon-btn icon-user p-2 rounded-full" style={{ color: '#93c5fd' }}>
+                                            <User className="size-5" />
                                         </button>
                                         {showUserDropdown && (
                                             <div
@@ -288,11 +218,17 @@ export default function Welcome() {
                                                     </div>
                                                 </div>
                                                 <div className="dropdown-body">
-                                                    <Link href="#" className="dropdown-item">
+                                                    {auth.user?.peran === 'Admin' && (
+                                                        <Link href="/dashboard" className="dropdown-item" style={{ color: '#2264c0', fontWeight: 600 }}>
+                                                            <LayoutGrid className="size-5" />
+                                                            Admin Panel
+                                                        </Link>
+                                                    )}
+                                                    <Link href="/pesanan" className="dropdown-item">
                                                         <ShoppingBag className="size-5" />
                                                         Pembelian
                                                     </Link>
-                                                    <Link href="/user/profile" className="dropdown-item">
+                                                    <Link href="/settings/profile" className="dropdown-item">
                                                         <Settings className="size-5" />
                                                         Pengaturan
                                                     </Link>
@@ -313,10 +249,10 @@ export default function Welcome() {
                             {/* Login/Register - hanya jika belum login */}
                             {!auth.user && (
                                 <div className="flex items-center gap-2">
-                                    <Link href="/login" className="px-4 py-2 text-sm font-medium text-[#1b1b18] hover:text-[#2264c0] transition-colors">
+                                    <Link href="/login" className="px-4 py-2 text-sm font-semibold text-white hover:text-[#fde9cb] transition-colors">
                                         Masuk
                                     </Link>
-                                    <Link href="/register" className="px-4 py-2 text-sm font-medium bg-[#2264c0] text-white rounded-full hover:bg-[#1a4f9a] transition-colors">
+                                    <Link href="/register" className="px-5 py-2 text-sm font-bold btn-orange-gradient rounded-full">
                                         Daftar
                                     </Link>
                                 </div>
@@ -326,31 +262,52 @@ export default function Welcome() {
                 </nav>
 
                 {/* Carousel Section */}
-                <section className="py-16 bg-white">
+                <section className="py-12 my-6 mx-4 rounded-3xl card-glass-light border border-white/30 shadow-md">
                     <div className="container mx-auto px-4">
                         <div className="flex flex-col lg:flex-row items-center gap-12">
-                            {/* Left: Image */}
+                            {/* Left: Image Carousel (Cross-Fade) */}
                             <div className="w-full lg:w-1/2">
-                                <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                                    <img
-                                        src={slides[currentSlide].image}
-                                        alt={slides[currentSlide].title}
-                                        className={`w-full h-auto transition-opacity duration-300 ${imageAnimClass}`}
-                                    />
+                                <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[16/10] bg-slate-100/10" style={{ boxShadow: '0 15px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.4)' }}>
+                                    {slides.map((slide, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                                                idx === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                                            }`}
+                                        >
+                                            <img
+                                                src={slide.image}
+                                                alt={slide.title}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => { (e.currentTarget.src = '/images/placeholder.png'); }}
+                                            />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                            {/* Right: Text Content */}
-                            <div className="w-full lg:w-1/2 text-center lg:text-left">
-                                <h2 className={`text-3xl lg:text-4xl font-bold text-[#1b1b18] mb-4 leading-tight ${textAnimClass}`}>
-                                    {slides[currentSlide].title}
-                                </h2>
-                                <p className={`text-[#5f6368] text-base lg:text-lg leading-relaxed mb-8 ${textAnimClass}`}>
-                                    {slides[currentSlide].description}
-                                </p>
-                                <div className="flex items-center gap-4 justify-center lg:justify-start">
+                            {/* Right: Text Content Carousel */}
+                            <div className="w-full lg:w-1/2 text-center lg:text-left min-h-[260px] flex flex-col justify-center relative">
+                                {slides.map((slide, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`transition-all duration-700 ease-in-out flex flex-col ${
+                                            idx === currentSlide 
+                                                ? 'opacity-100 translate-y-0 relative z-10' 
+                                                : 'opacity-0 translate-y-4 absolute z-0 pointer-events-none'
+                                        }`}
+                                    >
+                                        <h2 className="text-3xl lg:text-4xl font-bold mb-4 leading-tight text-slate-800">
+                                            {slide.title}
+                                        </h2>
+                                        <p className="text-base lg:text-lg leading-relaxed mb-8 text-slate-600">
+                                            {slide.description}
+                                        </p>
+                                    </div>
+                                ))}
+                                <div className="flex items-center gap-4 justify-center lg:justify-start mt-4">
                                     <button
                                         onClick={handlePrev}
-                                        className="w-12 h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                        className="w-12 h-12 btn-orange-gradient rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform cursor-pointer"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-white">
                                             <path d="m15 18-6-6 6-6"/>
@@ -358,19 +315,20 @@ export default function Welcome() {
                                     </button>
                                     <div className="flex gap-2">
                                         {slides.map((_, index) => (
-                                            <span
+                                            <button
                                                 key={index}
-                                                className={`w-3 h-3 rounded-full transition-colors ${
+                                                onClick={() => setCurrentSlide(index)}
+                                                className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${
                                                     index === currentSlide
-                                                        ? 'bg-[#2264c0] carousel-dot-active'
-                                                        : 'bg-[#2264c0]/30'
+                                                        ? 'bg-[#f28b27] scale-125 shadow-md shadow-orange-500/30'
+                                                        : 'bg-slate-300 hover:bg-slate-400'
                                                 }`}
                                             />
                                         ))}
                                     </div>
                                     <button
                                         onClick={handleNext}
-                                        className="w-12 h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                        className="w-12 h-12 btn-orange-gradient rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform cursor-pointer"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-6 text-white">
                                             <path d="m9 18 6-6-6-6"/>
@@ -456,7 +414,7 @@ export default function Welcome() {
                 </section>
 
                 {/* CTA Section */}
-                <section className="bg-[#2264c0] py-16 overflow-hidden relative group cursor-pointer">
+                <section className="bg-[#3668b5] py-16 overflow-hidden relative group cursor-pointer">
                     <div className="mx-auto max-w-7xl px-4 flex items-center justify-between gap-8 relative z-10">
                         <div>
                             <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Cari Lebih Banyak Gayamu</h2>
@@ -466,7 +424,7 @@ export default function Welcome() {
                     {/* White Block - slides to left 100% on hover */}
                     <div className="absolute top-0 right-0 w-0 h-full bg-white overflow-hidden group-hover:w-full transition-all duration-500 ease-out flex items-center justify-center z-20">
                         <div className="text-center">
-                            <span className="cta-text block text-3xl md:text-5xl font-black text-[#2264c0]">
+                            <span className="cta-text block text-3xl md:text-5xl font-black text-[#3668b5]">
                                 Koleksi Terlengkap<br/>untuk Gaya Hidupmu
                             </span>
                         </div>

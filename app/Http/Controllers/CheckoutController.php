@@ -8,6 +8,7 @@ use App\Models\Ekspedisi;
 use App\Models\Keranjang;
 use App\Models\Lensa;
 use App\Models\Pesanan;
+use App\Models\Produk;
 use App\Models\Provinsi;
 use App\Services\RajaOngkirService;
 use App\Services\XenditService;
@@ -24,14 +25,131 @@ class CheckoutController extends Controller
         private XenditService $xendit
     ) {}
 
-    public function index()
+    public function langsung(Request $request)
     {
-        $keranjang = Keranjang::with('produk')
-            ->where('pengguna_id', auth()->id())
-            ->get();
+        if (!auth()->check()) {
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $validated = $request->validate([
+            'produk_id'       => 'required|exists:produk,id',
+            'jumlah'         => 'required|integer|min:1',
+            'tipe_pembelian' => 'required|in:Frame Saja,Frame + Lensa',
+            'jenis_lensa_od' => 'nullable|string',
+            'nilai_lensa_od' => 'nullable|string',
+            'silinder_od'    => 'nullable|string',
+            'jenis_lensa_os' => 'nullable|string',
+            'nilai_lensa_os' => 'nullable|string',
+            'silinder_os'    => 'nullable|string',
+            'anti_radiasi'   => 'nullable|boolean',
+            'photochromic'   => 'nullable|boolean',
+        ]);
+
+        $produk = Produk::findOrFail($validated['produk_id']);
+
+        if ($produk->stok < ($validated['jumlah'] ?? 1)) {
+            return redirect()->back()->with('error', 'Stok tidak mencukupi.');
+        }
+
+        $lensaData = Lensa::where('status_lensa', true)->get();
+        $hargaLensa = 0;
+
+        if ($validated['tipe_pembelian'] === 'Frame + Lensa') {
+            $hargaLensa = $this->hitungHargaLensaLangsung($validated, $lensaData);
+        }
+
+        $jumlah = (int) ($validated['jumlah'] ?? 1);
+        $hargaProduk = (int) ($produk->harga_produk ?? 0);
+        $subtotal = ($hargaProduk + $hargaLensa) * $jumlah;
+
+        session(['checkout_langsung' => [
+            'produk_id'      => $produk->id,
+            'nama_produk'    => $produk->nama_produk,
+            'merek'          => $produk->merek ?? 'N/A',
+            'gambar'         => $produk->gambar ?? 'placeholder.png',
+            'harga_produk'   => $hargaProduk,
+            'jumlah'         => $jumlah,
+            'tipe_pembelian' => $validated['tipe_pembelian'],
+            'harga_lensa'    => $hargaLensa,
+            'subtotal'       => $subtotal,
+            'back_url'       => '/produk/' . $produk->id,
+            'jenis_lensa_od' => $validated['jenis_lensa_od'] ?? null,
+            'nilai_lensa_od' => $validated['nilai_lensa_od'] ?? null,
+            'silinder_od'    => $validated['silinder_od'] ?? null,
+            'jenis_lensa_os' => $validated['jenis_lensa_os'] ?? null,
+            'nilai_lensa_os' => $validated['nilai_lensa_os'] ?? null,
+            'silinder_os'    => $validated['silinder_os'] ?? null,
+            'anti_radiasi'   => !empty($validated['anti_radiasi']),
+            'photochromic'   => !empty($validated['photochromic']),
+        ]]);
+
+        return redirect()->route('checkout.langsung');
+    }
+
+    public function langsungGet(Request $request)
+    {
+        if (!auth()->check()) {
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $data = session('checkout_langsung');
+
+        if (!$data) {
+            return redirect('/katalog')->with('error', 'Data checkout tidak ditemukan.');
+        }
+
+        $alamat    = Alamat::with('provinsi')->where('pengguna_id', auth()->id())->get();
+        $provinsi  = Provinsi::orderBy('nama_provinsi')->get();
+        $ekspedisi = Ekspedisi::where('status_ekspedisi', true)->get();
+
+        $item = [
+            'id'              => 'langsung_' . $data['produk_id'],
+            'produk_id'       => $data['produk_id'],
+            'nama_produk'     => $data['nama_produk'],
+            'merek'           => $data['merek'],
+            'gambar'          => $data['gambar'],
+            'harga_produk'    => $data['harga_produk'],
+            'jumlah'          => $data['jumlah'],
+            'tipe_pembelian'  => $data['tipe_pembelian'],
+            'harga_lensa'     => $data['harga_lensa'],
+            'subtotal'        => $data['subtotal'],
+            'jenis_lensa_od'  => $data['jenis_lensa_od'],
+            'nilai_lensa_od'  => $data['nilai_lensa_od'],
+            'silinder_od'     => $data['silinder_od'],
+            'jenis_lensa_os'  => $data['jenis_lensa_os'],
+            'nilai_lensa_os'  => $data['nilai_lensa_os'],
+            'silinder_os'     => $data['silinder_os'],
+            'anti_radiasi'    => $data['anti_radiasi'],
+            'photochromic'    => $data['photochromic'],
+            'is_langsung'     => true,
+        ];
+
+        return Inertia::render('checkout', [
+            'items'     => [$item],
+            'total'     => $data['subtotal'],
+            'alamat'    => $alamat,
+            'provinsi'  => $provinsi,
+            'ekspedisi' => $ekspedisi,
+            'back_url'  => $data['back_url'] ?? '/katalog',
+        ]);
+    }
+
+    public function index(Request $request)
+    {
+        $selectedIds = $request->query('items');
+
+        $query = Keranjang::with('produk')
+            ->where('pengguna_id', auth()->id());
+
+        if ($selectedIds) {
+            $ids = array_filter(array_map('intval', explode(',', $selectedIds)));
+            $query->whereIn('id', $ids);
+        }
+
+        $keranjang = $query->get();
 
         if ($keranjang->isEmpty()) {
-            return redirect()->route('keranjang')->with('error', 'Keranjang kosong.');
+            return redirect()->route('keranjang')->with('error', 'Pilih produk yang ingin checkout.');
         }
 
         $lensaData = Lensa::where('status_lensa', true)->get();
@@ -55,7 +173,7 @@ class CheckoutController extends Controller
         });
 
         $alamat    = Alamat::with('provinsi')->where('pengguna_id', auth()->id())->get();
-        $provinsi  = $this->rajaOngkir->getProvinsiList();
+        $provinsi  = Provinsi::orderBy('nama_provinsi')->get();
         $ekspedisi = Ekspedisi::where('status_ekspedisi', true)->get();
 
         return Inertia::render('checkout', [
@@ -64,6 +182,7 @@ class CheckoutController extends Controller
             'alamat'     => $alamat,
             'provinsi'   => $provinsi,
             'ekspedisi'  => $ekspedisi,
+            'back_url'   => '/keranjang',
         ]);
     }
 
@@ -72,40 +191,25 @@ class CheckoutController extends Controller
         $request->validate([
             'alamat_id'    => 'required|exists:alamat,id',
             'ekspedisi_id' => 'required|exists:ekspedisi,id',
+            'produk_id'    => 'nullable|exists:produk,id',
         ]);
 
         $alamat      = Alamat::findOrFail($request->alamat_id);
         $ekspedisiId = (int) $request->ekspedisi_id;
+        $produkId    = $request->input('produk_id');
 
-        $keranjang  = Keranjang::where('pengguna_id', auth()->id())->get();
-        $beratTotal = max(250, $keranjang->sum(function ($item) {
-            return $item->jumlah * 200;
-        }));
-
-        Log::info('Ongkir request', [
-            'alamat_id'    => $request->alamat_id,
-            'kode_kota'    => $alamat->kode_kota,
-            'provinsi_id'  => $alamat->provinsi_id,
-            'ekspedisi_id' => $ekspedisiId,
-            'beratTotal'   => $beratTotal,
-        ]);
-
-        // Jika kode_kota tersedia, coba via API (dengan fallback lokal di service)
-        if (!empty($alamat->kode_kota)) {
-            $ongkirData = $this->rajaOngkir->hitungSatuEkspedisi(
-                (int) $alamat->kode_kota,
-                $ekspedisiId,
-                $beratTotal
-            );
+        if ($produkId) {
+            $beratTotal = max(250, (int)($request->input('jumlah') ?? 1) * 200);
         } else {
-            // Tidak ada kode_kota → langsung pakai data lokal berdasarkan provinsi
-            $ongkirData = $this->rajaOngkir->hitungDariProvinsi(
-                (int) $alamat->provinsi_id,
-                $ekspedisiId
-            );
+            $keranjang  = Keranjang::where('pengguna_id', auth()->id())->get();
+            $beratTotal = max(250, $keranjang->sum(fn($item) => $item->jumlah * 200));
         }
 
-        Log::info('Ongkir result', $ongkirData);
+        if (!empty($alamat->kode_kota)) {
+            $ongkirData = $this->rajaOngkir->hitungSatuEkspedisi((int) $alamat->kode_kota, $ekspedisiId, $beratTotal);
+        } else {
+            $ongkirData = $this->rajaOngkir->hitungDariProvinsi((int) $alamat->provinsi_id, $ekspedisiId);
+        }
 
         return response()->json($ongkirData);
     }
@@ -123,38 +227,35 @@ class CheckoutController extends Controller
                     'metode_pembayaran' => 'required|in:QRIS,Virtual Account BCA',
                 ]);
 
-                $keranjang = Keranjang::with('produk')
-                    ->where('pengguna_id', auth()->id())
-                    ->get();
+                $produkId = $request->input('produk_id');
+                $lensaData = Lensa::where('status_lensa', true)->get();
+                $totalProduk = 0;
+                $alamat = Alamat::findOrFail($request->alamat_id);
 
-                if ($keranjang->isEmpty()) {
-                    throw new \Exception('Keranjang kosong.');
+                if ($produkId) {
+                    $produk = Produk::findOrFail($produkId);
+                    $jumlah = (int) ($request->input('jumlah') ?? 1);
+                    if ($produk->stok < $jumlah) throw new \Exception('Stok tidak mencukupi.');
+
+                    $tipePembelian = $request->input('tipe_pembelian', 'Frame Saja');
+                    $hargaLensa = 0;
+                    if ($tipePembelian === 'Frame + Lensa') {
+                        $hargaLensa = $this->hitungHargaLensaLangsung($request->all(), $lensaData);
+                    }
+                    $beratTotal = max(250, $jumlah * 200);
+                } else {
+                    $keranjang = Keranjang::with('produk')->where('pengguna_id', auth()->id())->get();
+                    if ($keranjang->isEmpty()) throw new \Exception('Keranjang kosong.');
+                    $beratTotal = max(250, $keranjang->sum(fn($item) => $item->jumlah * 200));
                 }
 
-                $alamat     = Alamat::findOrFail($request->alamat_id);
-                $beratTotal = max(250, $keranjang->sum(fn($item) => $item->jumlah * 200));
-
-                // Hitung ongkir: pakai kode_kota jika ada, fallback ke provinsi
                 if (!empty($alamat->kode_kota)) {
-                    $ongkirData = $this->rajaOngkir->hitungSatuEkspedisi(
-                        (int) $alamat->kode_kota,
-                        (int) $request->ekspedisi_id,
-                        $beratTotal
-                    );
+                    $ongkirData = $this->rajaOngkir->hitungSatuEkspedisi((int) $alamat->kode_kota, (int) $request->ekspedisi_id, $beratTotal);
                 } else {
-                    $ongkirData = $this->rajaOngkir->hitungDariProvinsi(
-                        (int) $alamat->provinsi_id,
-                        (int) $request->ekspedisi_id
-                    );
+                    $ongkirData = $this->rajaOngkir->hitungDariProvinsi((int) $alamat->provinsi_id, (int) $request->ekspedisi_id);
                 }
                 $ongkosKirim = $ongkirData['harga'] ?? 0;
-
-                if ($ongkosKirim <= 0) {
-                    throw new \Exception('Gagal menghitung ongkos kirim. Silakan coba lagi.');
-                }
-
-                $lensaData   = Lensa::where('status_lensa', true)->get();
-                $totalProduk = 0;
+                if ($ongkosKirim <= 0) throw new \Exception('Gagal menghitung ongkos kirim.');
 
                 $pesanan = Pesanan::create([
                     'no_pesanan'             => 'EYL-' . strtoupper(Str::random(8)),
@@ -168,152 +269,176 @@ class CheckoutController extends Controller
                     'batas_waktu_pembayaran' => now()->addHours(24),
                 ]);
 
-                foreach ($keranjang as $item) {
-                    $hargaLensa  = $this->hitungHargaLensa($item, $lensaData);
-                    $subtotal    = ($item->produk->harga_produk + $hargaLensa) * $item->jumlah;
+                if ($produkId) {
+                    $subtotal = ((int) $produk->harga_produk + $hargaLensa) * $jumlah;
                     $totalProduk += $subtotal;
-
                     DetailPesanan::create([
                         'pesanan_id'     => $pesanan->id,
-                        'produk_id'      => $item->produk_id,
-                        'jumlah'         => $item->jumlah,
-                        'harga_frame'    => $item->produk->harga_produk,
-                        'tipe_pembelian' => $item->tipe_pembelian,
-                        'jenis_lensa_od' => $item->jenis_lensa_od,
-                        'nilai_lensa_od' => $item->nilai_lensa_od,
-                        'silinder_od'    => $item->silinder_od,
-                        'jenis_lensa_os' => $item->jenis_lensa_os,
-                        'nilai_lensa_os' => $item->nilai_lensa_os,
-                        'silinder_os'    => $item->silinder_os,
-                        'anti_radiasi'   => $item->anti_radiasi,
-                        'photochromic'   => $item->photochromic,
-                        'subtotal_lensa' => $hargaLensa * $item->jumlah,
+                        'produk_id'      => $produk->id,
+                        'jumlah'         => $jumlah,
+                        'harga_frame'    => $produk->harga_produk,
+                        'tipe_pembelian' => $tipePembelian,
+                        'jenis_lensa_od' => $request->input('jenis_lensa_od'),
+                        'nilai_lensa_od' => $request->input('nilai_lensa_od'),
+                        'silinder_od'    => $request->input('silinder_od'),
+                        'jenis_lensa_os' => $request->input('jenis_lensa_os'),
+                        'nilai_lensa_os' => $request->input('nilai_lensa_os'),
+                        'silinder_os'    => $request->input('silinder_os'),
+                        'anti_radiasi'   => $request->input('anti_radiasi') ? 1 : 0,
+                        'photochromic'   => $request->input('photochromic') ? 1 : 0,
+                        'subtotal_lensa' => $hargaLensa * $jumlah,
                         'subtotal'       => $subtotal,
                     ]);
+                    $produk->decrement('stok', $jumlah);
+                } else {
+                    foreach ($keranjang as $item) {
+                        $produk = $item->produk;
+                        if (!$produk || $produk->stok < $item->jumlah) throw new \Exception("Stok produk tidak mencukupi.");
+                        $hargaLensa = $this->hitungHargaLensa($item, $lensaData);
+                        $subtotal = ($item->produk->harga_produk + $hargaLensa) * $item->jumlah;
+                        $totalProduk += $subtotal;
+                        DetailPesanan::create([
+                            'pesanan_id'     => $pesanan->id,
+                            'produk_id'      => $item->produk_id,
+                            'jumlah'         => $item->jumlah,
+                            'harga_frame'    => $item->produk->harga_produk,
+                            'tipe_pembelian' => $item->tipe_pembelian,
+                            'jenis_lensa_od' => $item->jenis_lensa_od,
+                            'nilai_lensa_od' => $item->nilai_lensa_od,
+                            'silinder_od'    => $item->silinder_od,
+                            'jenis_lensa_os' => $item->jenis_lensa_os,
+                            'nilai_lensa_os' => $item->nilai_lensa_os,
+                            'silinder_os'    => $item->silinder_os,
+                            'anti_radiasi'   => $item->anti_radiasi,
+                            'photochromic'   => $item->photochromic,
+                            'subtotal_lensa' => $hargaLensa * $item->jumlah,
+                            'subtotal'       => $subtotal,
+                        ]);
+                        $produk->decrement('stok', $item->jumlah);
+                    }
                 }
 
                 $totalHarga = $totalProduk + $ongkosKirim;
                 $pesanan->update(['total_harga' => $totalHarga]);
+                $paymentResponse = ($request->metode_pembayaran === 'Virtual Account BCA') 
+                    ? $this->xendit->createBcaVaInvoice($pesanan->no_pesanan, $totalHarga, "Pembayaran {$pesanan->no_pesanan}", auth()->user()->email, $pesanan->id)
+                    : $this->xendit->createQrisInvoice($pesanan->no_pesanan, $totalHarga, "Pembayaran {$pesanan->no_pesanan}", auth()->user()->email, $pesanan->id);
 
-                // Validasi total harga minimum
-                if ($totalHarga < 1000) {
-                    throw new \Exception('Total pembelian minimum Rp 1.000.');
-                }
-
-                // Buat pembayaran berdasarkan metode
-                if ($request->metode_pembayaran === 'Virtual Account BCA') {
-                    $paymentResponse = $this->xendit->createCallbackVirtualAccount(
-                        'EYL-VA-' . strtoupper(Str::random(8)),
-                        $totalHarga,
-                        auth()->user()->name ?? auth()->user()->username ?? 'Pembeli EyeLit'
-                    );
-                } else { // QRIS
-                    $paymentResponse = $this->xendit->createQrisInvoice(
-                        'EYL-INV-' . strtoupper(Str::random(8)),
-                        $totalHarga,
-                        "Pembayaran untuk pesanan {$pesanan->no_pesanan}",
-                        auth()->user()->email ?? null
-                    );
-                }
-
-                // Hapus keranjang setelah berhasil
-                Keranjang::where('pengguna_id', auth()->id())->delete();
-
-                Log::info('Checkout berhasil', [
-                    'pesanan_id' => $pesanan->id,
-                    'total_harga' => $totalHarga,
-                    'metode_pembayaran' => $request->metode_pembayaran,
+                $pesanan->update([
+                    'xendit_payment_id'   => $paymentResponse['id'] ?? null,
+                    'xendit_payment_url'  => $paymentResponse['invoice_url'] ?? null,
+                    'xendit_payment_info' => $paymentResponse,
                 ]);
+
+                if (!$produkId) Keranjang::where('pengguna_id', auth()->id())->delete();
+                session()->forget('checkout_langsung');
             });
 
-            return redirect()->route('pesanan.show', $pesanan->id)
-                ->with('success', 'Pesanan berhasil dibuat!')
-                ->with('xendit_payment_url', $paymentResponse['invoice_url'] ?? $paymentResponse['account_number'] ?? null)
-                ->with('xendit_payment_info', $paymentResponse);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning('Checkout validation error', [
-                'user_id' => auth()->id(),
-                'errors' => $e->errors(),
-            ]);
-
-            return back()->withErrors($e->errors())->withInput();
-
+            return redirect()->route('pesanan.show', $pesanan->id)->with('success', 'Pesanan berhasil dibuat!');
         } catch (\Exception $e) {
-            Log::error('Checkout error', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return back()->with('error', 'Gagal memproses pesanan: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Gagal memproses pesanan: ' . $e->getMessage());
         }
     }
 
     public function tambahAlamat(Request $request)
     {
         $request->validate([
-            'nama_penerima'  => 'required|string|max:100',
-            'no_hp_penerima' => 'required|string|max:20',
-            'provinsi_id'    => 'required|exists:provinsi,id',
-            'kode_kota'      => 'required|integer',
-            'nama_kota'      => 'required|string|max:100',
-            'kota_kabupaten' => 'required|string|max:100',
-            'kecamatan'      => 'required|string|max:100',
-            'kode_pos'       => 'required|string|max:10',
-            'alamat_lengkap' => 'required|string',
+            'nama_penerima'  => 'required',
+            'no_hp_penerima' => 'required',
+            'provinsi_id'    => 'required',
+            'kode_kota'      => 'required',
+            'nama_kota'      => 'required',
+            'kota_kabupaten' => 'required',
+            'kecamatan'      => 'required',
+            'kode_pos'       => 'required',
+            'alamat_lengkap' => 'required',
         ]);
 
         $isFirst = !Alamat::where('pengguna_id', auth()->id())->exists();
+        Alamat::create(array_merge($request->all(), ['pengguna_id' => auth()->id(), 'alamat_utama' => $isFirst]));
 
-        Alamat::create([
-            'pengguna_id'    => auth()->id(),
-            'nama_penerima'  => $request->nama_penerima,
-            'no_hp_penerima' => $request->no_hp_penerima,
-            'provinsi_id'    => $request->provinsi_id,
-            'kode_kota'      => $request->kode_kota,
-            'nama_kota'      => $request->nama_kota,
-            'kota_kabupaten' => $request->kota_kabupaten,
-            'kecamatan'      => $request->kecamatan,
-            'kode_pos'       => $request->kode_pos,
-            'alamat_lengkap' => $request->alamat_lengkap,
-            'alamat_utama'   => $isFirst,
+        return back()->with('success', 'Alamat berhasil disimpan.');
+    }
+
+    public function editAlamat(Request $request, $id)
+    {
+        $request->validate([
+            'nama_penerima'  => 'required',
+            'no_hp_penerima' => 'required',
+            'provinsi_id'    => 'required',
+            'kode_kota'      => 'required',
+            'nama_kota'      => 'required',
+            'kota_kabupaten' => 'required',
+            'kecamatan'      => 'required',
+            'kode_pos'       => 'required',
+            'alamat_lengkap' => 'required',
         ]);
 
-        return back()->with('success', 'Alamat berhasil ditambahkan.');
+        $alamat = Alamat::where('pengguna_id', auth()->id())->findOrFail($id);
+        $alamat->update($request->all());
+
+        return back()->with('success', 'Alamat berhasil diperbarui.');
+    }
+
+    public function hapusAlamat($id)
+    {
+        $alamat = Alamat::where('pengguna_id', auth()->id())->findOrFail($id);
+        if ($alamat->alamat_utama) {
+            $nextAlamat = Alamat::where('pengguna_id', auth()->id())->where('id', '!=', $id)->first();
+            if ($nextAlamat) $nextAlamat->update(['alamat_utama' => true]);
+        }
+        $alamat->delete();
+        return back()->with('success', 'Alamat berhasil dihapus.');
+    }
+
+    public function setUtamaAlamat($id)
+    {
+        Alamat::where('pengguna_id', auth()->id())->update(['alamat_utama' => false]);
+        Alamat::where('pengguna_id', auth()->id())->findOrFail($id)->update(['alamat_utama' => true]);
+        return back()->with('success', 'Alamat utama berhasil diubah.');
     }
 
     private function hitungHargaLensa($item, $lensaData = null): int
     {
         if ($item->tipe_pembelian !== 'Frame + Lensa') return 0;
-
         $lensaData ??= Lensa::where('status_lensa', true)->get();
         $total = 0;
-
         foreach (['od', 'os'] as $mata) {
-            $jenis   = $item->{'jenis_lensa_'.$mata};
-            $nilai   = $item->{'nilai_lensa_'.$mata};
+            $jenis = $item->{'jenis_lensa_'.$mata};
+            $nilai = $item->{'nilai_lensa_'.$mata};
             $silinder = $item->{'silinder_'.$mata};
-
             if ($jenis && $nilai !== null) {
-                $lensa = $lensaData->where('jenis_lensa', $jenis)
-                    ->filter(fn($l) => $nilai >= $l->minus_plus_batas_bawah && $nilai <= $l->minus_plus_batas_atas)
-                    ->first();
+                $lensa = $lensaData->where('jenis_lensa', $jenis)->filter(fn($l) => $nilai >= $l->minus_plus_batas_bawah && $nilai <= $l->minus_plus_batas_atas)->first();
                 if ($lensa) $total += $lensa->harga_per_mata;
             }
-
             if ($silinder > 0) {
-                $ls = $lensaData->where('jenis_lensa', 'Silinder')
-                    ->filter(fn($l) => $silinder >= $l->minus_plus_batas_bawah && $silinder <= $l->minus_plus_batas_atas)
-                    ->first();
+                $ls = $lensaData->where('jenis_lensa', 'Silinder')->filter(fn($l) => $silinder >= $l->minus_plus_batas_bawah && $silinder <= $l->minus_plus_batas_atas)->first();
                 if ($ls) $total += $ls->harga_per_mata;
             }
         }
-
         if ($item->anti_radiasi) $total += $lensaData->first()?->harga_anti_radiasi ?? 0;
         if ($item->photochromic) $total += $lensaData->first()?->harga_photochromic ?? 0;
+        return (int) $total;
+    }
 
+    private function hitungHargaLensaLangsung(array $data, $lensaData): int
+    {
+        $total = 0;
+        foreach (['od', 'os'] as $mata) {
+            $jenis = $data['jenis_lensa_'.$mata] ?? null;
+            $nilai = $data['nilai_lensa_'.$mata] ?? null;
+            $silinder = $data['silinder_'.$mata] ?? null;
+            if ($jenis && $nilai !== null) {
+                $lensa = $lensaData->where('jenis_lensa', $jenis)->filter(fn($l) => $nilai >= $l->minus_plus_batas_bawah && $nilai <= $l->minus_plus_batas_atas)->first();
+                if ($lensa) $total += $lensa->harga_per_mata;
+            }
+            if ($silinder > 0) {
+                $ls = $lensaData->where('jenis_lensa', 'Silinder')->filter(fn($l) => $silinder >= $l->minus_plus_batas_bawah && $silinder <= $l->minus_plus_batas_atas)->first();
+                if ($ls) $total += $ls->harga_per_mata;
+            }
+        }
+        if (!empty($data['anti_radiasi'])) $total += $lensaData->first()?->harga_anti_radiasi ?? 0;
+        if (!empty($data['photochromic'])) $total += $lensaData->first()?->harga_photochromic ?? 0;
         return (int) $total;
     }
 }
-

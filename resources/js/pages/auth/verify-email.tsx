@@ -23,7 +23,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
             </div>
 
             <div className="text-center text-sm text-muted-foreground">
-                <TextLink href={logout()}>
+                <TextLink href={logout()} className="text-blue-600 font-semibold hover:text-blue-800">
                     Keluar
                 </TextLink>
             </div>

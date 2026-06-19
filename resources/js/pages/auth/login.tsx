@@ -123,7 +123,7 @@ export default function Login({
                             {canResetPassword && (
                                 <TextLink
                                     href={request()}
-                                    className="ml-auto text-sm"
+                                    className="ml-auto text-sm text-blue-600 hover:text-blue-800 font-semibold"
                                     tabIndex={5}
                                 >
                                     Lupa kata sandi?
@@ -174,7 +174,7 @@ export default function Login({
 
                     <Button
                         type="submit"
-                        className="mt-2 h-12 w-full bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
+                        className="mt-2 h-12 w-full btn-orange-gradient"
                         tabIndex={4}
                         disabled={processing}
                         data-test="login-button"
@@ -187,7 +187,7 @@ export default function Login({
                 {canRegister && (
                     <div className="text-center text-sm text-muted-foreground">
                         Belum punya akun?{' '}
-                        <TextLink href={register()} tabIndex={6} className="text-[#2264c0] font-medium">
+                        <TextLink href={register()} tabIndex={6} className="text-blue-600 font-semibold hover:text-blue-800">
                             Daftar
                         </TextLink>
                     </div>

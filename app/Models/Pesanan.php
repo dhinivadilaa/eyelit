@@ -27,6 +27,21 @@ class Pesanan extends Model
         'tanggal_pembatalan',
         'tanggal_konfirmasi_penerimaan',
         'alasan_pembatalan',
+        'xendit_payment_id',
+        'xendit_payment_url',
+        'xendit_payment_info',
+    ];
+
+    protected $casts = [
+        'xendit_payment_info' => 'array',
+        'tanggal_pemesanan' => 'datetime',
+        'batas_waktu_pembayaran' => 'datetime',
+        'tanggal_konfirmasi_pembayaran' => 'datetime',
+        'tanggal_pengiriman' => 'datetime',
+        'tanggal_tiba' => 'datetime',
+        'tanggal_selesai' => 'datetime',
+        'tanggal_pembatalan' => 'datetime',
+        'tanggal_konfirmasi_penerimaan' => 'datetime',
     ];
 
     public function detailPesanan()

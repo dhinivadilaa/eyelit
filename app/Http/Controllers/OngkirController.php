@@ -24,7 +24,7 @@ class OngkirController extends Controller
             $request->validate([
                 'alamat_id'   => 'required_without:kode_kota|exists:alamat,id',
                 'kode_kota'   => 'required_without:alamat_id|integer|min:1',
-                'ekspedisi_id' => 'required|integer|min:1|max:3',
+                'ekspedisi_id' => 'required|integer|min:1|max:5',
             ]);
 
             $ekspedisiId = (int) $request->ekspedisi_id;
@@ -53,7 +53,7 @@ class OngkirController extends Controller
             }
 
             // Validasi ekspedisi ID
-            if (!in_array($ekspedisiId, [1, 2, 3])) {
+            if (!in_array($ekspedisiId, [1, 2, 3, 4, 5])) {
                 return response()->json([
                     'success' => false,
                     'harga'   => 0,
@@ -65,19 +65,16 @@ class OngkirController extends Controller
 
             $keranjang = Keranjang::where('pengguna_id', auth()->id())->get();
 
-            if ($keranjang->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'harga'   => 0,
-                    'estimasi_hari_min' => '1',
-                    'estimasi_hari_max' => '3',
-                    'error'   => 'Keranjang kosong.',
-                ], 400);
+            // Hitung berat: dari keranjang jika ada, atau default 250g (untuk checkout langsung / Beli Sekarang)
+            if ($keranjang->isNotEmpty()) {
+                $beratTotal = max(250, $keranjang->sum(function ($item) {
+                    return $item->jumlah * 200; // Asumsi 200g per item
+                }));
+            } else {
+                // Checkout langsung — keranjang kosong, gunakan berat minimum
+                $beratTotal = 250;
             }
 
-            $beratTotal = max(250, $keranjang->sum(function ($item) {
-                return $item->jumlah * 200; // Asumsi 200g per item
-            }));
 
             Log::info('ONGKIR REQUEST', [
                 'kode_kota' => $kodeKota,
@@ -218,22 +215,22 @@ class OngkirController extends Controller
                 // Jika masih kosong, fallback ke kota hardcoded untuk beberapa provinsi umum
                 if (empty($kotaList)) {
                     $fallbackKota = [
-                        6 => [ // DKI Jakarta
-                            ['id' => 2, 'nama_kota' => 'Jakarta Pusat', 'kode_kota' => '2', 'provinsi_id' => 6],
-                            ['id' => 9, 'nama_kota' => 'Tangerang', 'kode_kota' => '9', 'provinsi_id' => 6],
-                            ['id' => 10, 'nama_kota' => 'Depok', 'kode_kota' => '10', 'provinsi_id' => 6],
+                        1 => [ // DKI Jakarta
+                            ['id' => 2, 'nama_kota' => 'Jakarta Pusat', 'kode_kota' => '2', 'provinsi_id' => 1],
+                            ['id' => 9, 'nama_kota' => 'Tangerang', 'kode_kota' => '9', 'provinsi_id' => 1],
+                            ['id' => 10, 'nama_kota' => 'Depok', 'kode_kota' => '10', 'provinsi_id' => 1],
                         ],
-                        9 => [ // Jawa Barat
-                            ['id' => 3, 'nama_kota' => 'Bandung', 'kode_kota' => '3', 'provinsi_id' => 9],
+                        2 => [ // Jawa Barat
+                            ['id' => 3, 'nama_kota' => 'Bandung', 'kode_kota' => '3', 'provinsi_id' => 2],
                         ],
-                        11 => [ // Jawa Timur
-                            ['id' => 4, 'nama_kota' => 'Surabaya', 'kode_kota' => '4', 'provinsi_id' => 11],
+                        6 => [ // Jawa Timur
+                            ['id' => 4, 'nama_kota' => 'Surabaya', 'kode_kota' => '4', 'provinsi_id' => 6],
                         ],
-                        18 => [ // Lampung
-                            ['id' => 1, 'nama_kota' => 'Bandar Lampung', 'kode_kota' => '1', 'provinsi_id' => 18],
+                        7 => [ // Lampung
+                            ['id' => 1, 'nama_kota' => 'Bandar Lampung', 'kode_kota' => '1', 'provinsi_id' => 7],
                         ],
-                        34 => [ // Sumatera Utara
-                            ['id' => 5, 'nama_kota' => 'Medan', 'kode_kota' => '5', 'provinsi_id' => 34],
+                        15 => [ // Sumatera Utara
+                            ['id' => 5, 'nama_kota' => 'Medan', 'kode_kota' => '5', 'provinsi_id' => 15],
                         ],
                     ];
 

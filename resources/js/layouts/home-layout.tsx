@@ -11,7 +11,7 @@ export default function HomeLayout({
     return (
         <>
             <Head title="Welcome" />
-            <div className="min-h-screen bg-[#FDFDFC]">
+            <div className="min-h-screen bg-gradient-to-tr from-slate-100 via-slate-50 to-blue-50/20">
                 {/* Navbar */}
                 <nav className="border-b border-[#19140035] bg-white">
                     <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">

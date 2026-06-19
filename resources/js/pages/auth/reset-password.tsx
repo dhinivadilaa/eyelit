@@ -156,7 +156,7 @@ export default function ResetPassword({ token, email }: Props) {
 
                     <Button
                         type="submit"
-                        className="mt-2 h-10 w-full bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
+                        className="mt-2 h-12 w-full btn-orange-gradient"
                         disabled={processing}
                     >
                         {processing && <Spinner />}

@@ -23,8 +23,9 @@ return new class extends Migration
                 'Selesai',
                 'Dibatalkan'
             ])->default('Menunggu Konfirmasi Pembayaran');
-            $table->enum('metode_pembayaran', ['QRIS', 'Virtual Account BCA'])->nullable();
+            $table->enum('metode_pembayaran', ['QRIS', 'BCA', 'BNI'])->nullable();
             $table->decimal('ongkos_kirim', 12, 0)->default(0);
+            $table->decimal('total_harga', 12, 0)->default(0);
             $table->timestamp('batas_waktu_pembayaran')->nullable();
             $table->timestamp('tanggal_pemesanan')->nullable();
             $table->timestamp('tanggal_konfirmasi_pembayaran')->nullable();

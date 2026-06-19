@@ -86,7 +86,7 @@ export default function ForgotPassword({ status }: Props) {
 
                     <Button
                         type="submit"
-                        className="mt-4 w-full h-10 bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
+                        className="mt-4 w-full h-12 btn-orange-gradient"
                         disabled={processing}
                     >
                         {processing && (
@@ -97,7 +97,7 @@ export default function ForgotPassword({ status }: Props) {
                 </form>
 
                 <div className="text-center text-sm text-muted-foreground">
-                    <TextLink href={login()}>Kembali ke halaman Masuk</TextLink>
+                    <TextLink href={login()} className="text-blue-600 font-semibold hover:text-blue-800">Kembali ke halaman Masuk</TextLink>
                 </div>
             </div>
         </>

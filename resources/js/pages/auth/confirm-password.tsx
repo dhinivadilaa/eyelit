@@ -52,7 +52,7 @@ export default function ConfirmPassword() {
 
                         <Button
                             type="submit"
-                            className="w-full h-12 bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
+                            className="w-full h-12 btn-orange-gradient"
                             disabled={processing}
                         >
                             {processing && <Spinner />}

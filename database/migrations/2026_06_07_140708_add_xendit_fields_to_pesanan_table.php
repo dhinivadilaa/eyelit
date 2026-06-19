@@ -6,17 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::table('pesanan', function (Blueprint $table) {
-            $table->decimal('total_harga', 12, 0)->default(0)->after('ongkos_kirim');
+            $table->string('xendit_payment_id')->nullable();
+            $table->text('xendit_payment_url')->nullable();
+            $table->json('xendit_payment_info')->nullable();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('pesanan', function (Blueprint $table) {
-            $table->dropColumn('total_harga');
+            $table->dropColumn(['xendit_payment_id', 'xendit_payment_url', 'xendit_payment_info']);
         });
     }
 };
