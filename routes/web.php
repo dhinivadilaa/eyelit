@@ -11,6 +11,27 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PesananController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/run-migrations-securely', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $output1 = \Illuminate\Support\Facades\Artisan::output();
+        
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        $output2 = \Illuminate\Support\Facades\Artisan::output();
+        
+        return response()->json([
+            'status' => 'success',
+            'migrate_output' => $output1,
+            'seed_output' => $output2
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
 Route::get('/', [ProdukController::class, 'index'])->name('home');
 Route::get('/katalog', [ProdukController::class, 'index'])->name('katalog');
 
