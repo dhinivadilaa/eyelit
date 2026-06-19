@@ -4,16 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
-import { execSync } from 'child_process';
 
-// Check if PHP is available on the environment path
-let hasPhp = false;
-try {
-    execSync('php -v', { stdio: 'ignore' });
-    hasPhp = true;
-} catch (e) {
-    hasPhp = false;
-}
+// Detect if we are building on Vercel (where PHP is not available in the build step)
+const isVercel = process.env.VERCEL === '1';
+const hasPhp = !isVercel;
 
 export default defineConfig({
     plugins: [
