@@ -32,6 +32,15 @@ Route::get('/run-migrations-securely', function () {
     }
 })->withoutMiddleware();
 
+Route::get('/test-db-connection', function () {
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        return "Berhasil terhubung ke database!";
+    } catch (\Exception $e) {
+        return "Gagal terhubung ke database: " . $e->getMessage();
+    }
+})->withoutMiddleware();
+
 Route::get('/', [ProdukController::class, 'index'])->name('home');
 Route::get('/katalog', [ProdukController::class, 'index'])->name('katalog');
 
