@@ -30,7 +30,7 @@ Route::get('/run-migrations-securely', function () {
             'message' => $e->getMessage()
         ], 500);
     }
-});
+})->withoutMiddleware();
 
 Route::get('/', [ProdukController::class, 'index'])->name('home');
 Route::get('/katalog', [ProdukController::class, 'index'])->name('katalog');
