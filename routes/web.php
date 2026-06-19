@@ -30,7 +30,10 @@ Route::get('/run-migrations-securely', function () {
             'message' => $e->getMessage()
         ], 500);
     }
-})->withoutMiddleware();
+})->withoutMiddleware([
+    \App\Http\Middleware\HandleInertiaRequests::class,
+    \App\Http\Middleware\HandleAppearance::class,
+]);
 
 Route::get('/test-db-connection', function () {
     try {
@@ -39,7 +42,10 @@ Route::get('/test-db-connection', function () {
     } catch (\Exception $e) {
         return "Gagal terhubung ke database: " . $e->getMessage();
     }
-})->withoutMiddleware();
+})->withoutMiddleware([
+    \App\Http\Middleware\HandleInertiaRequests::class,
+    \App\Http\Middleware\HandleAppearance::class,
+]);
 
 Route::get('/', [ProdukController::class, 'index'])->name('home');
 Route::get('/katalog', [ProdukController::class, 'index'])->name('katalog');
